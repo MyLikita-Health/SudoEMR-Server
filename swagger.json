@@ -1,0 +1,765 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "mylikita",
+    "description": "Documentation for all APIs of mylikita can be access here",
+    "contact": {}
+  },
+  "host": "api.mylikita.clinic",
+  "basePath": "/auth",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "description": "User authentication (Login)",
+        "summary": "https://api.mylikita.clinic/auth/login",
+        "tags": [
+          "auth"
+        ],
+        "operationId": "https://api.mylikita.clinic/auth/login",
+        "deprecated": false,
+        "produces": [
+          "application/json; charset=utf-8"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/https%3A~1~1api.mylikita.clinic~1auth~1loginrequest"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/error4041"
+            },
+            "examples": {
+              "application/json; charset=utf-8": {
+                "error": "User not found or not approved!"
+              }
+            },
+            "headers": {
+              "X-Powered-By": {
+                "type": "string",
+                "default": "Express"
+              },
+              "Access-Control-Allow-Origin": {
+                "type": "string",
+                "default": "*"
+              },
+              "Content-Length": {
+                "type": "string",
+                "default": "43"
+              },
+              "ETag": {
+                "type": "string",
+                "default": "W/\"2b-LcvJISYghwZL/ujvDxICOXiKh1I\""
+              },
+              "Date": {
+                "type": "string",
+                "default": "Sun, 21 Feb 2021 20:28:24 GMT"
+              },
+              "Connection": {
+                "type": "string",
+                "default": "keep-alive"
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/success"
+            },
+            "examples": {
+              "application/json; charset=utf-8": {
+                "success": true,
+                "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE2MTM5MzkxODUsImV4cCI6MTYxMzk0Mjc4NX0.KmK2Wnv8epKyqZ9W-AtW_cjJiUTPBNvRgv2Y5-kZJmE",
+                "user": {
+                  "id": 41,
+                  "username": "admin",
+                  "firstname": "Samson",
+                  "lastname": "Pius",
+                  "email": "sam@pharm.com",
+                  "phone": null,
+                  "image": "https://res.cloudinary.com/emaitee/image/upload/v1593618169/mylikita/profile_images/docAvater.png",
+                  "role": "Receptionist",
+                  "accessTo": [
+                    "Laboratory",
+                    "Accounts",
+                    "Admin",
+                    "Human Resource"
+                  ],
+                  "facilityId": "966a89f6-05d8-4564-b319-2f8863821e75",
+                  "prefix": null,
+                  "speciality": "",
+                  "userType": null,
+                  "serviceCost": null,
+                  "referralId": null,
+                  "address": null,
+                  "availableDays": null,
+                  "availableFromTime": null,
+                  "availableToTime": null,
+                  "department": "",
+                  "functionality": [
+                    "Drug Sales",
+                    "Inventory Overview",
+                    "Report Summary",
+                    "Analytics",
+                    "Daily Sales",
+                    "Profit",
+                    "Suppliers Overview",
+                    "Create User",
+                    "Manage Users",
+                    "Settings",
+                    "Hospital Billings",
+                    "Create a Client Account",
+                    "Make Deposit",
+                    "Record Expenses",
+                    "Generate Account Report",
+                    "Account Statement",
+                    "Create/Edit Services",
+                    "Setup Account Chart",
+                    "Setup Transactions",
+                    "Cash Handover",
+                    "Drug Sales",
+                    "Drug Dispensary",
+                    "Store Record",
+                    "Manage Suppliers",
+                    "Drug List",
+                    "Dashboard",
+                    "Returned Drugs",
+                    "Create New Facility",
+                    "Setup Lab Test",
+                    "Registrations",
+                    "Client Registrations",
+                    "Customer Approval",
+                    "Donations Report",
+                    "Registration Report",
+                    "Report Form",
+                    "Sample Collection",
+                    "Microbiology Analysis",
+                    "Radiology Analysis",
+                    "Completed Lab Test",
+                    "Print Lab Test",
+                    "Inventary",
+                    "Track Lab Test",
+                    "Online Lab Requisition",
+                    "Online Lab Analysis",
+                    "Doctor Payment Wallet",
+                    "Doctor Comment",
+                    "Organization Report",
+                    "Antibiotics Form",
+                    "Hematology Analysis",
+                    "Chemical Pathology Analysis",
+                    "Asset Register",
+                    "Rent Register",
+                    "Cash Movement"
+                  ]
+                }
+              }
+            },
+            "headers": {
+              "X-Powered-By": {
+                "type": "string",
+                "default": "Express"
+              },
+              "Access-Control-Allow-Origin": {
+                "type": "string",
+                "default": "*"
+              },
+              "Content-Length": {
+                "type": "string",
+                "default": "1730"
+              },
+              "ETag": {
+                "type": "string",
+                "default": "W/\"6c2-Ruj/l9e7Z9zCiDZRXVs2o6NJHFo\""
+              },
+              "Date": {
+                "type": "string",
+                "default": "Sun, 21 Feb 2021 20:26:25 GMT"
+              },
+              "Connection": {
+                "type": "string",
+                "default": "keep-alive"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/IncorrectPassword1"
+            },
+            "examples": {
+              "application/json; charset=utf-8": {
+                "error": "Password not correct"
+              }
+            },
+            "headers": {
+              "X-Powered-By": {
+                "type": "string",
+                "default": "Express"
+              },
+              "Access-Control-Allow-Origin": {
+                "type": "string",
+                "default": "*"
+              },
+              "Content-Length": {
+                "type": "string",
+                "default": "32"
+              },
+              "ETag": {
+                "type": "string",
+                "default": "W/\"20-BEaYa6OV5Wm0cMTuvhVAcelEB14\""
+              },
+              "Date": {
+                "type": "string",
+                "default": "Sun, 21 Feb 2021 20:29:10 GMT"
+              },
+              "Connection": {
+                "type": "string",
+                "default": "keep-alive"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sign-up": {
+      "post": {
+        "description": "User Registration",
+        "summary": "https://api.mylikita.clinic/auth/signup",
+        "tags": [
+          "auth"
+        ],
+        "operationId": "https://api.mylikita.clinic/auth/signup",
+        "deprecated": false,
+        "produces": [
+          "application/json; charset=utf-8"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/https%3A~1~1api.mylikita.clinic~1auth~1signuprequest"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ProvideAccess1"
+            },
+            "examples": {
+              "application/json; charset=utf-8": {
+                "errors": {
+                  "accessTo": "You need to give user access"
+                }
+              }
+            },
+            "headers": {
+              "X-Powered-By": {
+                "type": "string",
+                "default": "Express"
+              },
+              "Access-Control-Allow-Origin": {
+                "type": "string",
+                "default": "*"
+              },
+              "Content-Length": {
+                "type": "string",
+                "default": "54"
+              },
+              "ETag": {
+                "type": "string",
+                "default": "W/\"36-h1tpI+I2UffeeZYEar9MykSWF0E\""
+              },
+              "Date": {
+                "type": "string",
+                "default": "Sun, 21 Feb 2021 20:38:34 GMT"
+              },
+              "Connection": {
+                "type": "string",
+                "default": "keep-alive"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "https://api.mylikita.clinic/auth/loginrequest": {
+      "title": "https://api.mylikita.clinic/auth/loginrequest",
+      "example": {
+        "username": "admin",
+        "password": "123456"
+      },
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "username",
+        "password"
+      ]
+    },
+    "error4041": {
+      "title": "error4041",
+      "example": {
+        "error": "User not found or not approved!"
+      },
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ]
+    },
+    "success": {
+      "title": "success",
+      "example": {
+        "success": true,
+        "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE2MTM5MzkxODUsImV4cCI6MTYxMzk0Mjc4NX0.KmK2Wnv8epKyqZ9W-AtW_cjJiUTPBNvRgv2Y5-kZJmE",
+        "user": {
+          "id": 41,
+          "username": "admin",
+          "firstname": "Samson",
+          "lastname": "Pius",
+          "email": "sam@pharm.com",
+          "phone": null,
+          "image": "https://res.cloudinary.com/emaitee/image/upload/v1593618169/mylikita/profile_images/docAvater.png",
+          "role": "Receptionist",
+          "accessTo": [
+            "Laboratory",
+            "Accounts",
+            "Admin",
+            "Human Resource"
+          ],
+          "facilityId": "966a89f6-05d8-4564-b319-2f8863821e75",
+          "prefix": null,
+          "speciality": "",
+          "userType": null,
+          "serviceCost": null,
+          "referralId": null,
+          "address": null,
+          "availableDays": null,
+          "availableFromTime": null,
+          "availableToTime": null,
+          "department": "",
+          "functionality": [
+            "Drug Sales",
+            "Inventory Overview",
+            "Report Summary",
+            "Analytics",
+            "Daily Sales",
+            "Profit",
+            "Suppliers Overview",
+            "Create User",
+            "Manage Users",
+            "Settings",
+            "Hospital Billings",
+            "Create a Client Account",
+            "Make Deposit",
+            "Record Expenses",
+            "Generate Account Report",
+            "Account Statement",
+            "Create/Edit Services",
+            "Setup Account Chart",
+            "Setup Transactions",
+            "Cash Handover",
+            "Drug Sales",
+            "Drug Dispensary",
+            "Store Record",
+            "Manage Suppliers",
+            "Drug List",
+            "Dashboard",
+            "Returned Drugs",
+            "Create New Facility",
+            "Setup Lab Test",
+            "Registrations",
+            "Client Registrations",
+            "Customer Approval",
+            "Donations Report",
+            "Registration Report",
+            "Report Form",
+            "Sample Collection",
+            "Microbiology Analysis",
+            "Radiology Analysis",
+            "Completed Lab Test",
+            "Print Lab Test",
+            "Inventary",
+            "Track Lab Test",
+            "Online Lab Requisition",
+            "Online Lab Analysis",
+            "Doctor Payment Wallet",
+            "Doctor Comment",
+            "Organization Report",
+            "Antibiotics Form",
+            "Hematology Analysis",
+            "Chemical Pathology Analysis",
+            "Asset Register",
+            "Rent Register",
+            "Cash Movement"
+          ]
+        }
+      },
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "success",
+        "token",
+        "user"
+      ]
+    },
+    "User": {
+      "title": "User",
+      "example": {
+        "id": 41,
+        "username": "admin",
+        "firstname": "Samson",
+        "lastname": "Pius",
+        "email": "sam@pharm.com",
+        "phone": null,
+        "image": "https://res.cloudinary.com/emaitee/image/upload/v1593618169/mylikita/profile_images/docAvater.png",
+        "role": "Receptionist",
+        "accessTo": [
+          "Laboratory",
+          "Accounts",
+          "Admin",
+          "Human Resource"
+        ],
+        "facilityId": "966a89f6-05d8-4564-b319-2f8863821e75",
+        "prefix": null,
+        "speciality": "",
+        "userType": null,
+        "serviceCost": null,
+        "referralId": null,
+        "address": null,
+        "availableDays": null,
+        "availableFromTime": null,
+        "availableToTime": null,
+        "department": "",
+        "functionality": [
+          "Drug Sales",
+          "Inventory Overview",
+          "Report Summary",
+          "Analytics",
+          "Daily Sales",
+          "Profit",
+          "Suppliers Overview",
+          "Create User",
+          "Manage Users",
+          "Settings",
+          "Hospital Billings",
+          "Create a Client Account",
+          "Make Deposit",
+          "Record Expenses",
+          "Generate Account Report",
+          "Account Statement",
+          "Create/Edit Services",
+          "Setup Account Chart",
+          "Setup Transactions",
+          "Cash Handover",
+          "Drug Sales",
+          "Drug Dispensary",
+          "Store Record",
+          "Manage Suppliers",
+          "Drug List",
+          "Dashboard",
+          "Returned Drugs",
+          "Create New Facility",
+          "Setup Lab Test",
+          "Registrations",
+          "Client Registrations",
+          "Customer Approval",
+          "Donations Report",
+          "Registration Report",
+          "Report Form",
+          "Sample Collection",
+          "Microbiology Analysis",
+          "Radiology Analysis",
+          "Completed Lab Test",
+          "Print Lab Test",
+          "Inventary",
+          "Track Lab Test",
+          "Online Lab Requisition",
+          "Online Lab Analysis",
+          "Doctor Payment Wallet",
+          "Doctor Comment",
+          "Organization Report",
+          "Antibiotics Form",
+          "Hematology Analysis",
+          "Chemical Pathology Analysis",
+          "Asset Register",
+          "Rent Register",
+          "Cash Movement"
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "username": {
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "accessTo": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facilityId": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "speciality": {
+          "type": "string"
+        },
+        "userType": {
+          "type": "string"
+        },
+        "serviceCost": {
+          "type": "string"
+        },
+        "referralId": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "availableDays": {
+          "type": "string"
+        },
+        "availableFromTime": {
+          "type": "string"
+        },
+        "availableToTime": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string"
+        },
+        "functionality": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "firstname",
+        "lastname",
+        "email",
+        "phone",
+        "image",
+        "role",
+        "accessTo",
+        "facilityId",
+        "prefix",
+        "speciality",
+        "userType",
+        "serviceCost",
+        "referralId",
+        "address",
+        "availableDays",
+        "availableFromTime",
+        "availableToTime",
+        "department",
+        "functionality"
+      ]
+    },
+    "IncorrectPassword1": {
+      "title": "IncorrectPassword1",
+      "example": {
+        "error": "Password not correct"
+      },
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ]
+    },
+    "https://api.mylikita.clinic/auth/signuprequest": {
+      "title": "https://api.mylikita.clinic/auth/signuprequest",
+      "example": {
+        "username": "issatoyin",
+        "password": "123456",
+        "firstname": "Mustapha",
+        "lastname": "Issa",
+        "facilityId": "1",
+        "role": "2",
+        "privilege": "",
+        "accessTo": "",
+        "email": "issatoyin@gmail.com",
+        "speciality": "Neurosurgery",
+        "department": "Surgical department",
+        "functionality": "",
+        "userId": "222",
+        "image": ""
+      },
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "facilityId": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "privilege": {
+          "type": "string"
+        },
+        "accessTo": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "speciality": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string"
+        },
+        "functionality": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "username",
+        "password",
+        "firstname",
+        "lastname",
+        "facilityId",
+        "role",
+        "privilege",
+        "accessTo",
+        "email",
+        "speciality",
+        "department",
+        "functionality",
+        "userId",
+        "image"
+      ]
+    },
+    "Errors": {
+      "title": "Errors",
+      "example": {
+        "accessTo": "You need to give user access"
+      },
+      "type": "object",
+      "properties": {
+        "accessTo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "accessTo"
+      ]
+    },
+    "ProvideAccess1": {
+      "title": "ProvideAccess1",
+      "example": {
+        "errors": {
+          "accessTo": "You need to give user access"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "$ref": "#/definitions/Errors"
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    }
+  },
+  "tags": [
+    {
+      "name": "auth"
+    }
+  ]
+}
