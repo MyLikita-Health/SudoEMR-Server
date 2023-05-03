@@ -1,6 +1,7 @@
-# Hospital Management Software
+# Backend for MyLikita Opensource Hospital Management Software
 
 Backend App developed with Authentication, Access level control and password encryption
+compatible with MyLikita Opensource Hospital Management Software
 
 ## Offline Support
 App uses winser to install the backend app as a service.

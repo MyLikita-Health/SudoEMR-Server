@@ -1,6 +1,6 @@
 const express = require('express')
 const passport = require('passport')
-const port = process.env.PORT || 49495
+const port = process.env.PORT || 4000
 // const port = process.env.PORT || 46475 // demo
 const path = require('path')
 const fs = require('fs')
@@ -82,7 +82,7 @@ require('./config/passport')(passport)
 const models = require('./models')
 app.get('/', (req, res) =>
   res.json({
-    app_name: 'MyLikita',
+    app_name: 'MyLikita Opensource',
     app_version: '0.1',
     message: 'Welcome!',
     resource: 'https://mylikita.clinic',
