@@ -54,7 +54,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     generalexamination: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     cvs: {
@@ -74,55 +74,55 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     problem1: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     problem2: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     problem3: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     problem4: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     problem5: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     provisionalDiagnosis1: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     provisionalDiagnosis2: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     provisionalDiagnosis3: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     provisionalDiagnosis4: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     provisionalDiagnosis5: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     addedcare: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     partToDress: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     dresswith: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     seen_by: {
@@ -151,7 +151,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     pastSurgicalHistory: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     social: {
@@ -159,15 +159,15 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     otherSocialHistory: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     obtsGyneaHistory: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     pasttMedicalHistory: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     allergy: {
@@ -175,15 +175,15 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     otherAllergies: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     drugHistory: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     otherSysExamination: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     respiratoryRate: {
@@ -195,7 +195,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     presenting_complaints: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     athropometry_weight: {
@@ -233,7 +233,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     management_plan: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     asthmatic: {
@@ -277,7 +277,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     observation_request: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     hypertensiveRegularOnMedication: {
@@ -293,11 +293,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     dressing_request: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     nursing_request: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     nursing_request_status: {

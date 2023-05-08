@@ -29,9 +29,9 @@ fs.appendFile('./log/ServerData.log', '', function (err) {
 })
 
 cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 // const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 const rfs = require('rotating-file-stream')
@@ -97,8 +97,8 @@ models.sequelize.sync().then(() => {
 })
 
 const swaggerUi = require('swagger-ui-express')
-const swaggerDocument = require('./swagger.json')
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+// const swaggerDocument = require('./swagger.json')
+// app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 require('./routes/hospitals')(app)
 require('./routes/users')(app)
 require('./routes/patientrecords')(app)

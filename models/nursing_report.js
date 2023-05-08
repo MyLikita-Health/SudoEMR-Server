@@ -12,11 +12,15 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     report: {
-      type: DataTypes.STRING(2000),
+      type: DataTypes.TEXT,
       allowNull: false
     },
     facilityId: {
       type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
       allowNull: false
     }
   }, {

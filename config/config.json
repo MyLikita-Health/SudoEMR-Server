@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "",
-    "password": "",
-    "database": "",
-    "host": "",
+    "username": "root",
+    "password": "!Bits_123",
+    "database": "sudoemr",
+    "host": "localhost",
     "dialect": "mysql",
     "use_env_variable": false,
     "pool": {

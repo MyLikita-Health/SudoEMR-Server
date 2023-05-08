@@ -1,7 +1,7 @@
 const db = require('../models')
 const PatientRecords = db.Patientrecords
 const moment = require('moment')
-const queryOperationNotes = require('./operationnotes').queryOperationNotes
+// const queryOperationNotes = require('./operationnotes').queryOperationNotes
 
 exports.getPatientList = (req, res) => {
   const { facilityId } = req.params
@@ -418,18 +418,18 @@ exports.getBeneficiaryNo = (req, res) => {
     .catch((err) => res.status(500).json({ err }))
 }
 
-exports.operationNote = (req, res) => {
-  queryOperationNotes(
-    req.body,
-    (results) => {
-      res.json({ success: true, results })
-    },
-    (err) => {
-      console.log(err)
-      res.status(500).json({ success: false, err })
-    },
-  )
-}
+// exports.operationNote = (req, res) => {
+//   queryOperationNotes(
+//     req.body,
+//     (results) => {
+//       res.json({ success: true, results })
+//     },
+//     (err) => {
+//       console.log(err)
+//       res.status(500).json({ success: false, err })
+//     },
+//   )
+// }
 
 exports.getClientAccNos = (req, res) => {
   const { facilityId } = req.query

@@ -57,7 +57,7 @@ module.exports = (app) => {
     "/patientrecords/getBeneficiaryNo/:accountNo/:facilityId",
     patientrecords.getBeneficiaryNo
   );
-  app.post("/patientrecords/operation", patientrecords.operationNote);
+  // app.post("/patientrecords/operation", patientrecords.operationNote);
   app.get("/client/get-list", patientrecords.getClientAccNos);
   app.post("/surgical-note/new", patientrecords.surgicalNote);
 };

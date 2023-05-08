@@ -74,7 +74,7 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: ""
     },
     address: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true,
       defaultValue: ""
     },

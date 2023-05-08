@@ -1,6 +1,6 @@
 const db = require('../models')
 const moment = require('moment')
-const { queryDrugFreq } = require('./pharmacy')
+// const { queryDrugFreq } = require('./pharmacy')
 
 // .query(`insert into dispensary(drug,quantity_dispensed,amount,expiry_date,by_whom,payment_status,receipt_no,facilityId) VALUES ${data
 exports.dispense = (req, res) => {
@@ -102,80 +102,80 @@ function savePrescription(
     .catch((err) => error(err))
 }
 
-exports.newPrescriptionBatch = (req, res) => {
-  const { data, decision, facilityId, patientId } = req.body
-  // let patientStatus = data[0][12]
-  // let patientId = data[0][5]
+// exports.newPrescriptionBatch = (req, res) => {
+//   const { data, decision, facilityId, patientId } = req.body
+//   // let patientStatus = data[0][12]
+//   // let patientId = data[0][5]
 
-  for (let i = 0; i < data.length; i++) {
-    let currentP = data[i]
-    let currentHr = moment().format('HH:mm')
-    let currentDate = moment().format('YYYY-MM-DD')
+//   for (let i = 0; i < data.length; i++) {
+//     let currentP = data[i]
+//     let currentHr = moment().format('HH:mm')
+//     let currentDate = moment().format('YYYY-MM-DD')
 
-    let no_of_days = Math.round(
-      moment
-        .duration(
-          moment().add(currentP.duration, currentP.period).diff(moment()),
-        )
-        .asDays(),
-    )
-    console.log('Calculated Number of days =====================> ', no_of_days)
+//     let no_of_days = Math.round(
+//       moment
+//         .duration(
+//           moment().add(currentP.duration, currentP.period).diff(moment()),
+//         )
+//         .asDays(),
+//     )
+//     console.log('Calculated Number of days =====================> ', no_of_days)
 
-    queryDrugFreq(
-      {
-        facilityId: facilityId,
-        query_type: 'freq_details',
-        param: currentP.frequency,
-        current_hour: currentHr,
-        current_date: currentDate,
-        no_of_days,
-      },
-      (resp) => {
-        console.log(resp[0])
-        let { next_time, end_time, no_of_times, no_times, drug_count } = resp[0]
-        // let startTime = moment.utc(next_time).format('YYYY-MM-DD HH:mm:ss')
-        // let endTime = moment(startTime)
-        //   .add(currentP.duration, currentP.period)
-        //   .format('YYYY-MM-DD HH:mm:ss')
-        // let noOfDays = moment
-        //   .duration(moment(endTime).diff(moment(startTime)))
-        //   .asDays()
+//     queryDrugFreq(
+//       {
+//         facilityId: facilityId,
+//         query_type: 'freq_details',
+//         param: currentP.frequency,
+//         current_hour: currentHr,
+//         current_date: currentDate,
+//         no_of_days,
+//       },
+//       (resp) => {
+//         console.log(resp[0])
+//         let { next_time, end_time, no_of_times, no_times, drug_count } = resp[0]
+//         // let startTime = moment.utc(next_time).format('YYYY-MM-DD HH:mm:ss')
+//         // let endTime = moment(startTime)
+//         //   .add(currentP.duration, currentP.period)
+//         //   .format('YYYY-MM-DD HH:mm:ss')
+//         // let noOfDays = moment
+//         //   .duration(moment(endTime).diff(moment(startTime)))
+//         //   .asDays()
 
-        currentP.startTime = moment.utc(next_time).format('YYYY-MM-DD HH:mm:ss')
-        currentP.times_per_day = no_of_times
-        currentP.end_date = moment.utc(end_time).format('YYYY-MM-DD HH:mm:ss')
-        currentP.no_of_days = no_of_days
-        currentP.drug_count = drug_count
-        currentP.no_times = no_times
+//         currentP.startTime = moment.utc(next_time).format('YYYY-MM-DD HH:mm:ss')
+//         currentP.times_per_day = no_of_times
+//         currentP.end_date = moment.utc(end_time).format('YYYY-MM-DD HH:mm:ss')
+//         currentP.no_of_days = no_of_days
+//         currentP.drug_count = drug_count
+//         currentP.no_times = no_times
 
-        savePrescription(
-          currentP,
-          (results) => {
-            console.log(results)
+//         savePrescription(
+//           currentP,
+//           (results) => {
+//             console.log(results)
 
-            if (i === data.length - 1) {
-              if (decision === 'admit') {
-                doSchedule({ patient_id: patientId, facilityId }, () => {
-                  console.log('drug schedule run successfully')
-                  res.json({ results })
-                })
-              } else {
-                res.json({ results })
-              }
-            }
-          },
-          (err) => {
-            console.log(err)
-            res.status(500).json({ success: false, err })
-          },
-        )
-      },
-    )
-  }
+//             if (i === data.length - 1) {
+//               if (decision === 'admit') {
+//                 doSchedule({ patient_id: patientId, facilityId }, () => {
+//                   console.log('drug schedule run successfully')
+//                   res.json({ results })
+//                 })
+//               } else {
+//                 res.json({ results })
+//               }
+//             }
+//           },
+//           (err) => {
+//             console.log(err)
+//             res.status(500).json({ success: false, err })
+//           },
+//         )
+//       },
+//     )
+//   }
 
-  // })
-  // .catch((err) => res.json({ err }))
-}
+//   // })
+//   // .catch((err) => res.json({ err }))
+// }
 
 exports.getPendingPrescriptions = (req, res) => {
   const today = moment().format('YYYY-MM-DD')

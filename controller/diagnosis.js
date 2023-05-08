@@ -1,7 +1,7 @@
 const moment = require("moment");
 const { error } = require("winston");
 const db = require("../models");
-const { _saveRequestHistory } = require("./lab");
+// const { _saveRequestHistory } = require("./lab");
 // const moment = require('moment');
 
 exports.newDiagnosis = (req, res) => {
@@ -286,7 +286,7 @@ exports.consultationRecord = (req, res) => {
           });
         });
 
-      _saveRequestHistory(patient_id, consult_id, "", "", "insert", facilityId);
+      // _saveRequestHistory(patient_id, consult_id, "", "", "insert", facilityId);
       res.json({ success: true, results, message: "File Upload successfully" });
     })
     .catch((err) => {

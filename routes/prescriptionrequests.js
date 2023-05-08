@@ -5,10 +5,10 @@ module.exports = (app) => {
   
   app.post('/prescriptions/dispense', prescriptionrequests.dispense)
   app.post('/prescriptions/requests/new', prescriptionrequests.newPrescription)
-  app.post(
-    '/prescriptions/requests/batch-new',
-    prescriptionrequests.newPrescriptionBatch,
-  )
+  // app.post(
+  //   '/prescriptions/requests/batch-new',
+  //   prescriptionrequests.newPrescriptionBatch,
+  // )
   app.get(
     '/prescriptions/pending/:status',
     prescriptionrequests.getPendingPrescriptions,
