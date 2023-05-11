@@ -46,6 +46,10 @@ module.exports = function(sequelize, DataTypes) {
     facilityId: {
       type: DataTypes.STRING(50),
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false
     }
   }, {
     sequelize,

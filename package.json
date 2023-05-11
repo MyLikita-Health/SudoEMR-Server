@@ -1,5 +1,5 @@
 {
-  "name": "hmsbackend",
+  "name": "sudo-emr-server",
   "version": "1.1.0",
   "private": true,
   "main": "app.js",
