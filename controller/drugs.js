@@ -369,7 +369,6 @@ exports.newDrugPurchase = (req, res) => {
 
 exports.getDrugInfoFromDrugCode = (req, res) => {
   const { drugCode, facilityId } = req.params;
-
   db.sequelize
     .query(
       `SELECT drug,drug_code,generic_name,cost_price,balance,dispensary_balance,

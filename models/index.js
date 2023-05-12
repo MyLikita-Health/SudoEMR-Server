@@ -8,9 +8,6 @@ const basename = path.basename(__filename);
 require("dotenv");
 // const env = 'docInvidividual';
 const env = process.env.NODE_ENV || "development";
-// const env = process.env.NODE_ENV || 'production_opt';
-// const env = process.env.NODE_ENV || "production";
-// const env = process.env.NODE_ENV || 'test';
 
 // const config = require("../config/config_db")[env];
 const config = require("../config/config_db")[env];
