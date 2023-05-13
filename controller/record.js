@@ -94,13 +94,13 @@ exports.saveRecordInfo = (req, res) => {
           console.log("LDLLLLDLLDLDLDL", results);
           db.sequelize
             .query(
-              `INSERT INTO patientrecords(facilityId,title,surname,firstname,other,Gender,age,maritalstatus,DOB,dateCreated,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,accountNo,beneficiaryNo,balance,id, accountType,patient_passport) VALUES ("${facilityId}","","${surname}","${firstname}","${contactName}","${gender}",0,"${maritalStatus}","${dob}","${moment().format(
+              `INSERT INTO patientrecords(facilityId,title,surname,firstname,other,Gender,age,maritalstatus,DOB,dateCreated,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,accountNo,beneficiaryNo,balance,id, accountType,patient_passport,createdAt,updatedAt) VALUES ("${facilityId}","","${surname}","${firstname}","${contactName}","${gender}",0,"${maritalStatus}","${dob}","${moment().format(
                 "YYYY-MM-DD"
               )}","${phone}","${email}","","","${occupation}","${
                 contact === "self" ? address : contactAddress
               }","${nextOfKinName}","${nextOfKinRelationship}","${nextOfKinPhone}","${nextOfKinEmail}","${nextOfKinAddress}","${clientAccount}","${nextPatientNo}",0,"${
                 clientAccount + "-" + nextPatientNo
-              }", "${accountType}", "${patient_passport}")`
+              }", "${accountType}", "${patient_passport}","${moment().format('YYYY-MM-DD hh:mm:ss')}",'0000-00-00 00-00-00')`
             )
             .then((result) => {
               res.json({ success: true, result });
@@ -122,7 +122,6 @@ exports.saveRecordInfo = (req, res) => {
 };
 
 exports.getPatients = (req, res) => {
-  const { facId } = req.params;
   // console.log({query_type , patient_id , facilityId })
   const { query_type = "all", patient_id = null, facilityId = "" } = req.query;
   db.sequelize
@@ -130,7 +129,7 @@ exports.getPatients = (req, res) => {
       replacements: {
         query_type,
         patient_id,
-        facility_id: facId,
+        facility_id: facilityId,
       },
     })
     .then((resp) => {

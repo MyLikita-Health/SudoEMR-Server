@@ -6,8 +6,9 @@ module.exports = (app) => {
     `/save/record/info`,
     localUploadNew.single('file'),
     record.saveRecordInfo,
-  )
-  app.get('/get/patient/:facId', record.getPatients)
+  );
+  app.get('/get/patients',record.getPatients)
+  // app.get('/get/patient/:facId', record.getPatients)
 
   app.post('/beds/new', record.newBed)
   app.get('/beds', record.getBeds)

@@ -150,7 +150,7 @@ exports.login = (req, res) => {
                     availableToTime: user[0].dataValues.availableToTime,
                     department: user[0].dataValues.department,
                     signature_title: user[0].dataValues.signature_title,
-                    functionality: [],
+                    functionality: user[0].dataValues.functionality,
                   },
                 });
               }
