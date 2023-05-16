@@ -1223,7 +1223,6 @@ exports.deleteDrugsPurchase = (req, res) => {
     });
 };
 
-exports.newDrugSchedule = (req, res) => {};
 
 function drugFreqSetupApi(
   { query_type = "", title = "", timing = "", timingInt = "0" },
@@ -1246,7 +1245,6 @@ function drugFreqSetupApi(
 
 exports.getDrugFreqSetup = (req, res) => {
   const { query_type } = req.query;
-
   drugFreqSetupApi(
     { query_type },
     (results) => {

@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     account: {
       type: DataTypes.STRING(10),
-      allowNull: false
+      allowNull: true
     },
     price: {
       type: DataTypes.INTEGER,

@@ -150,7 +150,7 @@ exports.newBed = (req, res) => {
     facilityId = "",
     noOfBeds = 1,
   } = req.body;
-
+  console.log(req.body)
   db.sequelize
     .query(
       "CALL create_bed(:query_type, :classType, :price, :bedName, :facilityId,:noOfBeds)",
@@ -175,7 +175,6 @@ exports.newBed = (req, res) => {
 
 exports.getBeds = (req, res) => {
   const { query_type = "", facilityId = "" } = req.query;
-
   db.sequelize
     .query("CALL get_beds(:query_type, :facilityId)", {
       replacements: {
