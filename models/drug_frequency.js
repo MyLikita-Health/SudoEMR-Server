@@ -11,17 +11,17 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(20),
       allowNull: false
     },
-    time_start: {
+    time: {
       type: DataTypes.TIME,
       allowNull: true
     },
-    interval_: {
+    drug_time: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    interval_uom: {
+    no_times: {
       type: DataTypes.STRING(10),
-      allowNull: false
+      allowNull: true
     }
   }, {
     sequelize,

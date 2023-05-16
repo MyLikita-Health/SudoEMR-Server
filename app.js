@@ -109,6 +109,7 @@ require('./routes/doc')(app)
 require('./routes/pharmacy')(app)
 require('./routes/record')(app)
 require('./routes/dicom')(app)
+require('./routes/drugs')(app)
 
 // globally catching unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
