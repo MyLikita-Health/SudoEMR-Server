@@ -20,6 +20,15 @@ module.exports = (app) => {
     patientrecords.patientClarking
   );
   app.get(
+    "/accounts/approved/list/:facilityId",
+    patientrecords.getApprovedAccounts
+  );
+  app.get('/client/next-patient-id/:facId', patientrecords.getNextPatientNo)
+    app.get(
+    '/client/nextBeneficiaryId/:accountNo/:facId',
+    patientrecords.getNextClientBeneficiaryNo,
+  );
+  app.get(
     "/patientrecords/fetchUserById/:id/:facilityId",
     patientrecords.getUsersById
   );
@@ -46,6 +55,15 @@ module.exports = (app) => {
   app.get(
     "/patientrecords/patientAssignedToday/:facilityId",
     patientrecords.patientAssignedToday
+  );
+  app.get('/lab/service/all/:facilityId', patientrecords.getAllLabServices)
+  app.get(
+    "/lab/patient/full-info/:patientId/:facilityId",
+    patientrecords.getPatientInfo
+  );
+  app.get(
+    "/lab/patient/info/:patientId/:facilityId",
+    patientrecords.getPatientFullInfo
   );
   app.get(
     "/patientrecords/fetchByDoctor/:facilityId",
