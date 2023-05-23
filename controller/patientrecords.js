@@ -466,12 +466,9 @@ exports.patientAssignedToday = (req, res) => {
     .catch((err) => res.status(500).json({ err }));
 };
 
-
 exports.getAllLabServices = (req, res) => {
   const { facilityId } = req.params;
   const { query_type = "" } = req.query;
-
-  // const stmt = 'call get_all_lab_services(:facilityId)';
   const stmt = `CALL get_all_lab_services(:facilityId,:query_type,:lab)`;
   db.sequelize
     .query(stmt, { replacements: { facilityId, query_type, lab: "" } })
@@ -482,6 +479,28 @@ exports.getAllLabServices = (req, res) => {
     });
 };
 
+exports.getLabChildren = (req, res) => {
+  const { head, facilityId } = req.params;
+
+  db.sequelize
+    .query(
+      "CALL get_all_lab_services(:facilityId,:query_type,:head)",
+      {
+        replacements: {
+          facilityId,
+          query_type: "children",
+          head,
+        },
+      }
+    )
+    .then((results) => {
+      res.json({ success: true, results });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ success: false, err });
+    });
+};
 
 exports.fetchByDoctor = (req, res) => {
   const { assigned_to } = req.body;
