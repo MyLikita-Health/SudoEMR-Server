@@ -465,7 +465,20 @@ exports.patientAssignedToday = (req, res) => {
     .then((results) => res.json({ results }))
     .catch((err) => res.status(500).json({ err }));
 };
+exports.getLabPatients = (req, res) => {
+  const { facilityId, condition, type } = req.params;
 
+  db.sequelize
+    .query(`call get_patient_list(:facilityId,:condition,:type)`, {
+      replacements: {
+        facilityId,
+        condition,
+        type,
+      },
+    })
+    .then((results) => res.json({ success: true, results }))
+    .catch((err) => res.status(500).json({ err }));
+};
 exports.getAllLabServices = (req, res) => {
   const { facilityId } = req.params;
   const { query_type = "" } = req.query;

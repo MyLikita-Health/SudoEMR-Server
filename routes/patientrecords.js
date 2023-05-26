@@ -56,6 +56,7 @@ module.exports = (app) => {
     "/patientrecords/patientAssignedToday/:facilityId",
     patientrecords.patientAssignedToday
   );
+  app.get('/lab/patients/:condition/:type/:facilityId', patientrecords.getLabPatients)
   app.get('/lab/service/all/:facilityId', patientrecords.getAllLabServices);
   app.get('/lab/get-children/:head/:facilityId', patientrecords.getLabChildren);
   app.get(

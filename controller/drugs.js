@@ -1,3 +1,4 @@
+const { v4 } = require("uuid");
 const db = require("../models");
 const moment = require("moment");
 
@@ -102,7 +103,37 @@ exports.getDrugList = (req, res) => {
     .then((results) => res.json({ success: true, results }))
     .catch((err) => res.status(500).json({ err }));
 };
-
+exports.createDrug = (req, res) => {
+  const {
+    drug_name = "",
+    generic_name = "",
+    formulation = "",
+    facilityId = "",
+  } = req.body;
+  let id = v4()
+  let date = moment().format("YYYY-MM-DD hh:mm:ss");
+  db.sequelize
+    .query(
+      "CALL pharm_create_drug(:drug_name,:generic_name,:formulation,:id,:facilityId)",
+      {
+        replacements: {
+          drug_name,
+          generic_name,
+          formulation,
+          id,
+          facilityId,
+        },
+      }
+    )
+    .then(() => {
+      res.json({
+        success: true,
+      });
+    })
+    .catch((e) => {
+      res.status(500).json({ success: false, e, message: "Error" });
+    });
+};
 exports.addNewDrug = (req, res) => {
   const {
     drug,
@@ -499,6 +530,53 @@ exports.getFactoryDrugQtty = (req, res) => {
     })
     .catch((err) => {
       res.status(500).json({ success: false, err });
+    });
+};
+
+exports.getTotalDrugList = (req, res) => {
+  const { facilityId, filterText } = req.query;
+  console.log(req.query);
+  db.sequelize
+    .query("call get_druglist_count(:filterText,:facilityId)", {
+      replacements: { facilityId, filterText: `%${filterText}%` },
+    })
+    .then((results) =>
+      res.json({
+        results,
+        success: true,
+      })
+    )
+    .catch((err) => res.status(500).json({ err }));
+};
+
+exports.getDrugSearch = (req, res) => {
+  const { facilityId, searchValue, from, to, query = "" } = req.query;
+  db.sequelize
+    .query("call get_drug_search(:searchValue,:facilityId,:from,:to,:query)", {
+      replacements: {
+        facilityId,
+        searchValue: `%${searchValue}%`,
+        from: parseInt(from),
+        to: parseInt(to),
+        query,
+      },
+    })
+    .then((results) => res.status(200).json({ results, success: true }))
+    .catch((err) => res.status(500).json({ err }));
+};
+
+
+
+exports.getDrugList = (req, res) => {
+  const { facilityId, from, to } = req.query;
+  db.sequelize
+    .query("call get_druglist(:facilityId)", {
+      replacements: { facilityId },
+    })
+    .then((results) => res.status(200).json({ results, success: true }))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ err });
     });
 };
 
