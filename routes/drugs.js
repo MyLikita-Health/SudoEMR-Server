@@ -65,6 +65,7 @@ module.exports = (app) => {
   app.get("/api/pharmacy/v1/get-total-drug-list", drugs.getTotalDrugList);
   app.get("/api/pharmacy/v1/get-drug-search", drugs.getDrugSearch);
   app.post("/api/pharmacy/v1/create-drug", drugs.createDrug);
+  app.delete("/api/pharmacy/v1/delete-drug",drugs.deleteDrug);
   app.get('/drugs/analytics/profit/:facilityId', drugs.getMostProfitableItems)
   app.get('/drugs/analytics/fastselling/:facilityId', drugs.getFastSellingItems)
   app.get(

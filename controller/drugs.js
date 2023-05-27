@@ -110,7 +110,7 @@ exports.createDrug = (req, res) => {
     formulation = "",
     facilityId = "",
   } = req.body;
-  let id = v4()
+  let id = v4();
   let date = moment().format("YYYY-MM-DD hh:mm:ss");
   db.sequelize
     .query(
@@ -134,6 +134,7 @@ exports.createDrug = (req, res) => {
       res.status(500).json({ success: false, e, message: "Error" });
     });
 };
+
 exports.addNewDrug = (req, res) => {
   const {
     drug,
@@ -196,14 +197,17 @@ exports.updateDrug = (req, res) => {
 };
 
 exports.deleteDrug = (req, res) => {
-  const { facilityId } = req.body;
-  const { drugId } = req.params;
+  console.log(req.body);
+  const { id = "", facilityId = "" } = req.body;
   db.sequelize
-    .query("call delete_drug(:drugId,:facilityId)", {
-      replacements: { drugId, facilityId },
+    .query("call delete_drug(:id,:facilityId)", {
+      replacements: { id, facilityId },
     })
     .then((results) => res.json({ success: true, results }))
-    .catch((err) => res.status(500).json({ err }));
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ err });
+    });
 };
 
 exports.updateDrugQttyById = (req, res) => {
@@ -565,8 +569,6 @@ exports.getDrugSearch = (req, res) => {
     .catch((err) => res.status(500).json({ err }));
 };
 
-
-
 exports.getDrugList = (req, res) => {
   const { facilityId, from, to } = req.query;
   db.sequelize
@@ -649,7 +651,7 @@ exports.newPurchaseFromSupplier = (req, res) => {
     goodsHead,
     userId,
   } = req.body;
-  
+
   db.sequelize
     .query(
       `CALL new_purchase_from_supplier(:supplierAcc,:amountPaid,:userId,:receiptsn,:receiptno,
@@ -1300,7 +1302,6 @@ exports.deleteDrugsPurchase = (req, res) => {
       res.status(500).json({ success: false, err });
     });
 };
-
 
 function drugFreqSetupApi(
   { query_type = "", title = "", timing = "", timingInt = "0" },
