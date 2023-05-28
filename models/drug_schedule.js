@@ -62,7 +62,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: false,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "id_drug_schedule",
         unique: true,
         using: "BTREE",
         fields: [
@@ -70,49 +70,49 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "prescription_id",
+        name: "prescription_id_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "prescription_id" },
         ]
       },
       {
-        name: "patient_id",
+        name: "patient_id_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "patient_id" },
         ]
       },
       {
-        name: "facilityId",
+        name: "facilityId_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "facilityId" },
         ]
       },
       {
-        name: "status",
+        name: "status_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "status" },
         ]
       },
       {
-        name: "served_by",
+        name: "served_by_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "served_by" },
         ]
       },
       {
-        name: "administered_by",
+        name: "administered_by_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "administered_by" },
         ]
       },
       {
-        name: "allocation_id",
+        name: "allocation_id_drug_schedule",
         using: "BTREE",
         fields: [
           { name: "allocation_id" },

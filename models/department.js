@@ -24,7 +24,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: true,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "department_id",
         unique: true,
         using: "BTREE",
         fields: [

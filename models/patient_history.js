@@ -33,7 +33,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: true,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "id_patient_history",
         unique: true,
         using: "BTREE",
         fields: [
@@ -41,28 +41,28 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "patient_id",
+        name: "patient_id_patient_history",
         using: "BTREE",
         fields: [
           { name: "patient_id" },
         ]
       },
       {
-        name: "request_id",
+        name: "request_id_patient_history",
         using: "BTREE",
         fields: [
           { name: "request_id" },
         ]
       },
       {
-        name: "facilityId",
+        name: "facilityId_patient_history",
         using: "BTREE",
         fields: [
           { name: "facilityId" },
         ]
       },
       {
-        name: "createdAt",
+        name: "createdAt_patient_history",
         using: "BTREE",
         fields: [
           { name: "createdAt" },

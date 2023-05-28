@@ -69,7 +69,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: true,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "id_hospitals",
         unique: true,
         using: "BTREE",
         fields: [

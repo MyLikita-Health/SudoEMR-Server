@@ -177,7 +177,7 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: false,
       indexes: [
         {
-          name: "PRIMARY",
+          name: "id_lab_setup",
           unique: true,
           using: "BTREE",
           fields: [{ name: "id" }],

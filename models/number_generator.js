@@ -20,7 +20,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: false,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "id_number_generator",
         unique: true,
         using: "BTREE",
         fields: [

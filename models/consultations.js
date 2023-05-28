@@ -73,28 +73,28 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: true,
       indexes: [
         {
-          name: "PRIMARY",
+          name: "id_consultations",
           unique: true,
           using: "BTREE",
           fields: [{ name: "id" }],
         },
         {
-          name: "patient_id",
+          name: "patient_id_consultations",
           using: "BTREE",
           fields: [{ name: "patient_id" }],
         },
         {
-          name: "facilityId",
+          name: "facilityId_consultations",
           using: "BTREE",
           fields: [{ name: "facilityId" }],
         },
         {
-          name: "created_at",
+          name: "created_at_consultations",
           using: "BTREE",
           fields: [{ name: "created_at" }],
         },
         {
-          name: "decision",
+          name: "decision_consultations",
           using: "BTREE",
           fields: [{ name: "decision" }],
         },
@@ -109,12 +109,12 @@ module.exports = function (sequelize, DataTypes) {
           fields: [{ name: "treatment_plan_status" }],
         },
         {
-          name: "treatment_by",
+          name: "treatment_by_consultations",
           using: "BTREE",
           fields: [{ name: "treatment_by" }],
         },
         {
-          name: "userId",
+          name: "userId_consultations",
           using: "BTREE",
           fields: [{ name: "userId" }],
         },

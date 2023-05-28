@@ -124,10 +124,9 @@ module.exports = function (sequelize, DataTypes) {
         primaryKey: true,
       },
       patient_id: {
-        // autoIncrement: 1,
         type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       },
       enteredBy: {
         type: DataTypes.STRING(20),
@@ -185,7 +184,7 @@ module.exports = function (sequelize, DataTypes) {
       timestamps: true,
       indexes: [
         {
-          name: "PRIMARY",
+          name: "id_patientfileno_ind",
           unique: true,
           using: "BTREE",
           fields: [
@@ -196,42 +195,42 @@ module.exports = function (sequelize, DataTypes) {
           ],
         },
         {
-          name: "facilityId",
+          name: "facilityId_patientfileno_idx",
           using: "BTREE",
           fields: [{ name: "facilityId" }],
         },
         {
-          name: "patient_id",
+          name: "patient_id_patientfileno",
           using: "BTREE",
           fields: [{ name: "patient_id" }],
         },
         {
-          name: "seen_by",
+          name: "seen_by_patientfileno",
           using: "BTREE",
           fields: [{ name: "seen_by" }, { name: "date_seen" }],
         },
         {
-          name: "accountNo",
+          name: "accountNo_patientfileno_idx",
           using: "BTREE",
           fields: [{ name: "accountNo" }],
         },
         {
-          name: "status",
+          name: "status_patientfileno",
           using: "BTREE",
           fields: [{ name: "status" }],
         },
         {
-          name: "assigned_to",
+          name: "assigned_to_patientfileno",
           using: "BTREE",
           fields: [{ name: "assigned_to" }],
         },
         {
-          name: "patientStatus",
+          name: "patientStatus_patientfileno",
           using: "BTREE",
           fields: [{ name: "patientStatus" }],
         },
         {
-          name: "id",
+          name: "id_patientfileno_index1",
           using: "BTREE",
           fields: [{ name: "id" }],
         },

@@ -97,7 +97,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: true,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "id_operationnotes",
         unique: true,
         using: "BTREE",
         fields: [
@@ -105,14 +105,14 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "facilityId",
+        name: "facilityId_operationnotes",
         using: "BTREE",
         fields: [
           { name: "facilityId" },
         ]
       },
       {
-        name: "created_by",
+        name: "created_by_operationnotes",
         using: "BTREE",
         fields: [
           { name: "created_by" },

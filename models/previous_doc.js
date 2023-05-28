@@ -29,7 +29,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: true,
     indexes: [
       {
-        name: "PRIMARY",
+        name: "id_previous_doc",
         unique: true,
         using: "BTREE",
         fields: [
