@@ -33,14 +33,14 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "id_pagenavigation",
+        name: "role_pagenavigation",
         using: "BTREE",
         fields: [
           { name: "role" },
         ]
       },
       {
-        name: "id_pagenavigation",
+        name: "facilityId_pagenavigation",
         using: "BTREE",
         fields: [
           { name: "facilityId" },

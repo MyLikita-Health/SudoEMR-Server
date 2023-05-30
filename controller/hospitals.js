@@ -8,7 +8,6 @@ const { nearUpdateAPI } = require("../queries/near");
 exports.create = (req, res) => {
   let { name, code, address, type, logo, admin, hasStore } = req.body;
   let id = v4();
-  console.log(db);
   Hospital.create({
     id,
     name,
@@ -20,10 +19,11 @@ exports.create = (req, res) => {
     logo: logo ? logo : "",
   })
     .then((hospital) => {
-      res.json({ hospital, sucess: true });
+      res.json({ hospital, success: true });
     })
     .catch((err) => {
-      res.status(500).json({ err });
+      console.log(err)
+      res.status(500).json({ err,success:false });
     });
 };
 
@@ -45,9 +45,10 @@ exports.createBedSpace = (req, res) => {
 exports.getFacilityInfo = (req, res) => {
   const { facilityId } = req.params;
 
-  db.sequelize
-    .query("call get_facility_info(:facilityId)", {
-      replacements: { facilityId },
+    Hospital.findAll({
+      where:{
+        id:facilityId
+      }
     })
     .then((results) => res.json({ results: results[0] }))
     .catch((err) => res.status(500).json({ err }));

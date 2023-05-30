@@ -5,7 +5,7 @@ const transport = require("../config/nodemailer");
 // const passport = require('passport');
 
 const db = require("../models");
-const User = db.user;
+const User = db.users;
 const Contact = db.contact;
 const Referral = db.referral;
 const Feedbacks = db.feedbacks;
@@ -35,16 +35,19 @@ exports.create = (req, res) => {
     functionality,
     userId,
     image,
+    phone
   } = req.body;
-  // console.log(req.body)
+  console.log(req.body)
+  console.log({ errors, isValid })
   // check validations
   if (!isValid) {
     return res.status(400).json({ errors });
   }
-
+  
   User.findAll({ where: { username } }).then((user) => {
+    console.log(user)
     if (user.length && username !== "") {
-      return res.status(400).json({ username: "Username already exists!" });
+      return res.status(400).json({ message: "Username already exists!",success:false });
     } else {
       let newUser = {
         firstname,
@@ -60,6 +63,7 @@ exports.create = (req, res) => {
         department,
         functionality,
         createdBy: userId,
+        phone,
         image:
           "https://res.cloudinary.com/emaitee/image/upload/v1593618169/mylikita/profile_images/docAvater.png",
       };
@@ -69,10 +73,11 @@ exports.create = (req, res) => {
           newUser.password = hash;
           User.create(newUser)
             .then((user) => {
-              res.json({ user });
+              res.json({ user,success:true });
             })
             .catch((err) => {
-              res.status(500).json({ err });
+              console.log(err)
+              res.status(500).json({ err,success:false });
             });
         });
       });
@@ -83,7 +88,6 @@ exports.create = (req, res) => {
 exports.login = (req, res) => {
   const { errors, isValid } = validateLoginForm(req.body);
   let error;
-
   // check validation
   if (!isValid) {
     return res.status(400).json({ error: errors.toString() });
@@ -98,6 +102,7 @@ exports.login = (req, res) => {
     },
   })
     .then((user) => {
+      console.log(user);
       //check for user
       if (!user.length) {
         error = "User not found or not approved!";
