@@ -159,44 +159,4 @@ exports.delete = (req, res) => {
     .catch((err) => res.status(500).json({ msg: "Failed to delete!" }));
 };
 
-exports.getDepartments = (req, res) => {
-  const { facilityId = "", query_type = "" } = req.query;
-  db.sequelize
-    .query(`CALL department(:query_type, :facilityId,'','')`, {
-      replacements: {
-        facilityId,
-        query_type,
-      },
-    })
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
 
-exports.newDeparment = (req, res) => {
-  const {
-    department = "",
-    userId = "",
-    facilityId = "",
-    query_type = "",
-  } = req.body;
-
-  db.sequelize
-    .query("CALL department(:query_type, :facilityId,:department,userId)", {
-      replacements: {
-        department,
-        query_type,
-        facilityId,
-        userId,
-      },
-    })
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};

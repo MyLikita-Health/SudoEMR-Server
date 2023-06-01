@@ -2,7 +2,7 @@ var Service = require('node-windows').Service
 
 // Create a new service obj
 var svc = new Service({
-  name: 'MyLikita',
+  name: 'sudoEMR',
   description: 'Hospital Management Software',
   script: 'C:hmsserverapp.js',
 })

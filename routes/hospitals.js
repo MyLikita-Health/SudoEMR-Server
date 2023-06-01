@@ -25,7 +25,4 @@ module.exports = (app) => {
 
   // delete hospital
   app.delete('/hospitals/:hospitalId', hospital.delete)
-
-  app.get('/department', hospital.getDepartments)
-  app.post('/department', hospital.newDeparment)
 }

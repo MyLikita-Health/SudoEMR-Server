@@ -49,8 +49,6 @@ module.exports = (app) => {
 
   app.put('/users/approve/:id', users.approveUser)
 
-  app.get('/department/get-units', users.getUnits)
-
   app.put('/users/doctor/availability/:docId', users.updateDocAvailability)
   app.post('/admin/reset-user-pass', users.adminResetUser)
   app.post('/api/users/changepassword', users.changeUserPassword)

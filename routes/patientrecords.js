@@ -3,6 +3,7 @@ const { localUploadNew } = require("../config/multer");
 
 module.exports = (app) => {
   const patientrecords = require("../controller/patientrecords");
+  const record = require("../controller/record");
   // const config = require('../config/config')
   // const allowOnly = require('../services/routesHelper').allowOnly;
 
@@ -56,7 +57,7 @@ module.exports = (app) => {
     "/patientrecords/patientAssignedToday/:facilityId",
     patientrecords.patientAssignedToday
   );
-  app.get('/lab/patients/:condition/:type/:facilityId', patientrecords.getLabPatients)
+  app.get('/lab/patients/:condition/:type/:facilityId', record.getInPatients)
   app.get('/lab/service/all/:facilityId', patientrecords.getAllLabServices);
   app.get('/lab/get-children/:head/:facilityId', patientrecords.getLabChildren);
   app.get(

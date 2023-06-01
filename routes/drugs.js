@@ -84,6 +84,7 @@ module.exports = (app) => {
 
   app.get('/frequency-setup/get', drugs.getDrugFreqSetup)
   app.post('/frequency-setup/new', drugs.newDrugFreqSetup)
+  app.delete('/frequency-setup/delete', drugs.deleteDrugFreqSetup)
   app.post('/fluid-chart-setup/new', drugs.fluidChart) 
   app.post("/drug-list/new", drugs.drugList);
  

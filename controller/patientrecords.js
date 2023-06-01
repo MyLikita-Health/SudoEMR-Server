@@ -1,14 +1,17 @@
+const { Op } = require("sequelize");
 const db = require("../models");
-const PatientRecords = db.Patientrecords;
+const PatientRecords = db.patientrecords;
 const moment = require("moment");
 // const queryOperationNotes = require('./operationnotes').queryOperationNotes
 
 exports.getPatientList = (req, res) => {
   const { facilityId } = req.params;
-  db.sequelize
-    .query("call get_patient_records(:facilityId)", {
-      replacements: { facilityId },
-    })
+  PatientRecords.findAll({
+    where: {
+      facilityId
+    },
+    order: [['accountNo', 'DESC']]
+  })
     .then((results) => res.json({ success: true, results }))
     .catch((err) => res.status(500).json({ err }));
 };
@@ -424,35 +427,193 @@ exports.delete = (req, res) => {
 };
 
 exports.assign = (req, res) => {
+  const date = moment().format("YYYY-MM-DD");
   const {
     id = "",
     assigned_to = "",
     facilityId = "",
     query_type = "",
   } = req.body;
-
-  db.sequelize
-    .query(`call assign(:assigned_to,:id, :facilityId,:query_type)`, {
-      replacements: { assigned_to, id, facilityId, query_type },
-    })
-    .then((results) => res.json({ results }))
-    .catch((err) => res.status(500).json({ err }));
+  switch (query_type) {
+    case "assign":
+      PatientRecords.update(
+        { assigned_to: assigned_to, date_assigned: date },
+        {
+          where: {
+            id: id,
+            facilityId: facilityId,
+          },
+        }
+      )
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "waiting":
+      PatientRecords.findAll({
+        attributes: [
+          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          "id",
+          "date_assigned",
+        ],
+        where: {
+          assigned_to: "waiting",
+          facilityId: facilityId,
+        },
+        order: [["date_assigned", "ASC"]],
+      })
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "specialists":
+      PatientRecords.findAll({
+        attributes: [
+          [sequelize.literal("concat(a.firstname, ' ', a.surname)"), "name"],
+          "a.id",
+          "date_assigned",
+          [
+            sequelize.literal("concat(b.firstname, ' ', b.lastname)"),
+            "doctorName",
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: "assignedDoctor",
+            attributes: [],
+          },
+        ],
+        where: {
+          assigned_to: {
+            [Op.not]: [null, "", "waiting"],
+          },
+          facilityId: facilityId,
+        },
+        order: [["date_assigned", "ASC"]],
+      })
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "by_doc":
+      PatientRecords.findAll({
+        attributes: [
+          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          "id",
+          "date_assigned",
+        ],
+        where: {
+          assigned_to: assigned_to,
+          facilityId: facilityId,
+        },
+      })
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "end":
+      PatientRecords.update(
+        { assigned_to: "", date_assigned: new Date() }, // New values to update
+        { where: { id: id, facilityId: facilityId } } // Condition for the update
+      )
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    default:
+      break;
+  }
 };
 
 exports.assignQuery = (req, res) => {
+  const date = moment().format("YYYY-MM-DD");
   const {
     id = "",
     assigned_to = "",
     facilityId = "",
     query_type = "",
-  } = req.query;
-
-  db.sequelize
-    .query(`call assign(:assigned_to,:id, :facilityId,:query_type)`, {
-      replacements: { assigned_to, id, facilityId, query_type },
-    })
-    .then((results) => res.json({ results }))
-    .catch((err) => res.status(500).json({ err }));
+  } = req.body;
+  switch (query_type) {
+    case "assign":
+      PatientRecords.update(
+        { assigned_to: assigned_to, date_assigned: date },
+        {
+          where: {
+            id: id,
+            facilityId: facilityId,
+          },
+        }
+      )
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "waiting":
+      PatientRecords.findAll({
+        attributes: [
+          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          "id",
+          "date_assigned",
+        ],
+        where: {
+          assigned_to: "waiting",
+          facilityId: facilityId,
+        },
+        order: [["date_assigned", "ASC"]],
+      })
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "specialists":
+      PatientRecords.findAll({
+        attributes: [
+          [sequelize.literal("concat(a.firstname, ' ', a.surname)"), "name"],
+          "a.id",
+          "date_assigned",
+          [
+            sequelize.literal("concat(b.firstname, ' ', b.lastname)"),
+            "doctorName",
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: "assignedDoctor",
+            attributes: [],
+          },
+        ],
+        where: {
+          assigned_to: {
+            [Op.not]: [null, "", "waiting"],
+          },
+          facilityId: facilityId,
+        },
+        order: [["date_assigned", "ASC"]],
+      })
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "by_doc":
+      PatientRecords.findAll({
+        attributes: [
+          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          "id",
+          "date_assigned",
+        ],
+        where: {
+          assigned_to: assigned_to,
+          facilityId: facilityId,
+        },
+      })
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    case "end":
+      PatientRecords.update(
+        { assigned_to: "", date_assigned: new Date() }, // New values to update
+        { where: { id: id, facilityId: facilityId } } // Condition for the update
+      )
+        .then((results) => res.json({ results, success: true }))
+        .catch((err) => res.status(500).json({ err, success: false }));
+      break;
+    default:
+      break;
+  }
 };
 
 exports.patientAssignedToday = (req, res) => {
@@ -496,16 +657,13 @@ exports.getLabChildren = (req, res) => {
   const { head, facilityId } = req.params;
 
   db.sequelize
-    .query(
-      "CALL get_all_lab_services(:facilityId,:query_type,:head)",
-      {
-        replacements: {
-          facilityId,
-          query_type: "children",
-          head,
-        },
-      }
-    )
+    .query("CALL get_all_lab_services(:facilityId,:query_type,:head)", {
+      replacements: {
+        facilityId,
+        query_type: "children",
+        head,
+      },
+    })
     .then((results) => {
       res.json({ success: true, results });
     })

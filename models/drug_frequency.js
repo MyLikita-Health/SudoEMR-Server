@@ -16,12 +16,16 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     drug_time: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(50),
       allowNull: true
     },
     no_times: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: true
+    },
+    facilityId: {
+      type: DataTypes.STRING(100),
+      allowNull: false
     }
   }, {
     sequelize,

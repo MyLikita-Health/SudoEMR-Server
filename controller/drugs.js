@@ -1,7 +1,8 @@
 const { v4 } = require("uuid");
 const db = require("../models");
 const moment = require("moment");
-
+const HourList = db.hour_list;
+const DrugFrequency = db.drug_frequency;
 exports.addDrug = (req, res) => {
   const { facilityId } = req.body;
   const stmt =
@@ -1304,28 +1305,67 @@ exports.deleteDrugsPurchase = (req, res) => {
 };
 
 function drugFreqSetupApi(
-  { query_type = "", title = "", timing = "", timingInt = "0" },
+  {
+    query_type = "",
+    title = "",
+    timing = "",
+    timingInt = "0",
+    facilityId = "",
+  },
   callback = (f) => f,
   error = (f) => f
 ) {
-  // const { query_type } = req.query
-  db.sequelize
-    .query("CALL drug_freq_setup(:query_type,:title,:timing,:timingInt)", {
-      replacements: {
-        query_type,
-        title,
-        timing,
-        timingInt,
-      },
-    })
-    .then((results) => callback(results))
-    .catch((err) => error(err));
+  console.log({
+    query_type,
+    title,
+    timing,
+    timingInt,
+    facilityId,
+  });
+  switch (query_type) {
+    case "hours":
+      HourList.findAll()
+        .then((results) => callback(results))
+        .catch((err) => {
+          console.log(err);
+          error(err);
+        });
+      break;
+    case "new":
+      DrugFrequency.create({
+        description: title,
+        time: timing,
+        drug_time: timingInt,
+        no_times: timingInt,
+        facilityId: facilityId,
+      })
+        .then((results) => callback(results))
+        .catch((err) => {
+          console.log(err);
+          error(err);
+        });
+      break;
+    case "list":
+      DrugFrequency.findAll({
+        where: {
+          facilityId: facilityId,
+        },
+      })
+        .then((results) => callback(results))
+        .catch((err) => {
+          console.log(err);
+          error(err);
+        });
+
+    default:
+      break;
+  }
 }
 
 exports.getDrugFreqSetup = (req, res) => {
-  const { query_type } = req.query;
+  const { query_type, facilityId } = req.query;
   drugFreqSetupApi(
-    { query_type },
+    { query_type, facilityId },
     (results) => {
       res.json({ success: true, results });
     },
@@ -1336,13 +1376,33 @@ exports.getDrugFreqSetup = (req, res) => {
   );
 };
 
+exports.deleteDrugFreqSetup = (req, res) => {
+  const { facilityId, title } = req.body;
+  DrugFrequency.destroy({
+    where: {
+      description: title,
+      facilityId: facilityId,
+    },
+  })
+    .then((results) => res.json({ success: true, results }))
+    .catch((err) => {
+      console.log(err)
+      res.json({ success: false, err })});
+};
+
 exports.newDrugFreqSetup = (req, res) => {
-  const { query_type, title, selectedTiming } = req.body;
+  const { query_type, title, selectedTiming, facilityId = "" } = req.body;
 
   for (let i = 0; i < selectedTiming.length; i++) {
     let current = selectedTiming[i];
     drugFreqSetupApi(
-      { query_type, title, timing: current.hour, timingInt: current.hourInt },
+      {
+        query_type,
+        title,
+        timing: current.hour,
+        timingInt: current.hourInt,
+        facilityId,
+      },
       (results) => {
         console.log(results);
       },

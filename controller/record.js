@@ -1,6 +1,8 @@
 const db = require("../models");
 const moment = require("moment");
-
+const PatientRecords = db.patientrecords;
+const BedList = db.bedlist;
+const { Op } = require("sequelize");
 exports.saveRecordInfo = (req, res) => {
   const {
     accountType = "",
@@ -100,7 +102,9 @@ exports.saveRecordInfo = (req, res) => {
                 contact === "self" ? address : contactAddress
               }","${nextOfKinName}","${nextOfKinRelationship}","${nextOfKinPhone}","${nextOfKinEmail}","${nextOfKinAddress}","${clientAccount}","${nextPatientNo}",0,"${
                 clientAccount + "-" + nextPatientNo
-              }", "${accountType}", "${patient_passport}","${moment().format('YYYY-MM-DD hh:mm:ss')}",'0000-00-00 00-00-00')`
+              }", "${accountType}", "${patient_passport}","${moment().format(
+                "YYYY-MM-DD hh:mm:ss"
+              )}",'0000-00-00 00-00-00')`
             )
             .then((result) => {
               res.json({ success: true, result });
@@ -122,49 +126,75 @@ exports.saveRecordInfo = (req, res) => {
 };
 
 exports.getPatients = (req, res) => {
-  // console.log({query_type , patient_id , facilityId })
   const { query_type = "all", patient_id = null, facilityId = "" } = req.query;
-  db.sequelize
-    .query(`CALL get_patients(:query_type,:facility_id,:patient_id)`, {
-      replacements: {
-        query_type,
-        patient_id,
-        facility_id: facilityId,
+  if (query_type === "all") {
+    PatientRecords.findAll({
+      attributes: [
+        [db.sequelize.literal("surname || ' ' || firstname"), "name"],
+        "address",
+        "Gender",
+        "DOB",
+        "patient_id",
+        "email",
+        "id",
+        "accountNo",
+        "accountType",
+      ],
+      where: {
+        facilityId: facilityId,
+      },
+      order: [["accountNo", "DESC"]],
+    })
+      .then((resp) => {
+        res.json({ success: true, results: resp });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ success: false, err });
+      });
+  } else if (patient_id !== null) {
+    PatientRecords.findAll({
+      attributes: [
+        [sequelize.literal("surname || ' ' || firstname"), "name"],
+        "address",
+        "Gender",
+        "DOB",
+        "patient_id",
+        "email",
+        "id",
+        "accountNo",
+        "accountType",
+      ],
+      where: {
+        facilityId: _facility_id,
+        id: _patient_id,
       },
     })
-    .then((resp) => {
-      res.json({ success: true, results: resp ? resp : [] });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false, err });
-    });
+      .then((resp) => {
+        res.json({ success: true, results: resp });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ success: false, err });
+      });
+  }
 };
 
 exports.newBed = (req, res) => {
   const {
-    query_type = "",
     classType = "",
     price = 0,
     bedName = "",
     facilityId = "",
     noOfBeds = 1,
   } = req.body;
-  console.log(req.body)
-  db.sequelize
-    .query(
-      "CALL create_bed(:query_type, :classType, :price, :bedName, :facilityId,:noOfBeds)",
-      {
-        replacements: {
-          query_type,
-          classType,
-          price,
-          bedName,
-          facilityId,
-          noOfBeds,
-        },
-      }
-    )
+  BedList.create({
+    price,
+    class_type: classType,
+    name: bedName,
+    no_of_beds: noOfBeds,
+    facilityId: facilityId,
+  })
     .then((results) => {
       res.json({ success: true, results });
     })
@@ -175,19 +205,63 @@ exports.newBed = (req, res) => {
 
 exports.getBeds = (req, res) => {
   const { query_type = "", facilityId = "" } = req.query;
-  db.sequelize
-    .query("CALL get_beds(:query_type, :facilityId)", {
-      replacements: {
-        query_type,
-        facilityId,
-      },
-    })
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      res.json({ success: false, err });
-    });
+  // db.sequelize
+  //   .query("CALL get_beds(:query_type, :facilityId)", {
+  //     replacements: {
+  //       query_type,
+  //       facilityId,
+  //     },
+  //   })
+  switch (query_type) {
+    case "classes":
+      BedList.findAll({
+        attributes: ['class_type'],
+        where: {
+          facilityId: facilityId
+        },
+        raw: true,
+        distinct: true
+      })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+    case "bedlist":
+      db.sequelize
+        .query(`SELECT * FROM bedlist_view WHERE facilityId=:facilityId;`, {
+          replacements: {
+            facilityId,
+          },
+          type: db.sequelize.QueryTypes.SELECT,
+        })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+      case "available":
+        db.sequelize
+        .query(`SELECT * FROM bedlist_view WHERE occupied != no_of_beds AND facilityId=:facilityId;`, {
+          replacements: {
+            facilityId,
+          },
+          type: db.sequelize.QueryTypes.SELECT,
+        })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+        break;
+    default:
+      break;
+  }
 };
 
 exports.bedAllocation = (req, res) => {
@@ -242,21 +316,103 @@ exports.bedAllocation = (req, res) => {
 
 exports.getInPatients = (req, res) => {
   const { query_type = "", facilityId = "", condition = "" } = req.query;
-
-  db.sequelize
-    .query("CALL get_patient_list(:facilityId, :condition, :query_type)", {
-      replacements: {
-        facilityId,
-        query_type,
-        condition,
-      },
-    })
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      res.json({ success: false, err });
-    });
+  switch (query_type) {
+    case "in_patients":
+      db.sequelize
+        .query(
+          `SELECT * FROM in_patient_list WHERE facilityId = :facilityId ORDER BY sort_index;`,
+          {
+            replacements: { facilityId }, // Replace with the actual facilityId value
+            type: db.sequelize.QueryTypes.SELECT,
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.json({ success: false, err });
+        });
+      break;
+    case "in_patient":
+      db.sequelize
+        .query(
+          `SELECT * FROM in_patient_list  WHERE allocation_id="${condition}" AND facilityId="${facilityId}" ORDER BY`,
+          {
+            type: db.sequelize.QueryTypes.SELECT,
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+    case "in_patient_by_id":
+      db.sequelize
+        .query(
+          `SELECT * FROM in_patient_list  WHERE patient_id="${condition}" AND facilityId=${facilityId} ORDER BY `,
+          {
+            type: db.sequelize.QueryTypes.SELECT,
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+    case "by_status":
+      db.sequelize
+        .query(
+          `SELECT * FROM in_patient_list  WHERE status="${condition}" AND facilityId="${facilityId}" ORDER BY `,
+          {
+            type: db.sequelize.QueryTypes.SELECT,
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+    case "pending-admission":
+      PatientRecords.findAll({ where: { patientStatus: "pending-admission" } })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+    default:
+      PatientRecords.findAll({
+        attributes: [
+          "id",
+          "patient_id",
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
+          "dob",
+          ["Gender", "gender"],
+          [db.sequelize.literal("ifnull(phoneNo, '')"), "phoneNo"],
+          [db.sequelize.literal("ifnull(email, '')"), "email"],
+        ],
+        where: {
+          surname: { [Op.ne]: condition },
+          facilityId: facilityId,
+        },
+        order: [["dateCreated", "DESC"]],
+      })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.json({ success: false, err });
+        });
+      break;
+  }
 };
 
 exports.getPatientAccount = (req, res) => {

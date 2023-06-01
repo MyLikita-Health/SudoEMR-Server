@@ -16,6 +16,7 @@ const constants = require("../services/constants").constants;
 // load input validation
 const validateRegisterForm = require("../validation/register");
 const validateLoginForm = require("../validation/login");
+const { Op } = require("sequelize");
 
 // create user
 exports.create = (req, res) => {
@@ -34,18 +35,15 @@ exports.create = (req, res) => {
     department,
     functionality,
     userId,
-    image,
-    phone
+    phone,
+    status
   } = req.body;
-  console.log(req.body)
-  console.log({ errors, isValid })
   // check validations
   if (!isValid) {
     return res.status(400).json({ errors });
   }
   
   User.findAll({ where: { username } }).then((user) => {
-    console.log(user)
     if (user.length && username !== "") {
       return res.status(400).json({ message: "Username already exists!",success:false });
     } else {
@@ -64,6 +62,7 @@ exports.create = (req, res) => {
         functionality,
         createdBy: userId,
         phone,
+        status,
         image:
           "https://res.cloudinary.com/emaitee/image/upload/v1593618169/mylikita/profile_images/docAvater.png",
       };
@@ -77,6 +76,7 @@ exports.create = (req, res) => {
             })
             .catch((err) => {
               console.log(err)
+              console.log("herrererereerreerreererer")
               res.status(500).json({ err,success:false });
             });
         });
@@ -272,10 +272,12 @@ exports.profile = (req, res) => {
 
 exports.findAllUsers = (req, res) => {
   let { facilityId } = req.params;
-  db.sequelize
-    .query("call get_users(:facilityId)", {
-      replacements: { facilityId },
-    })
+  User.findAll({
+    where: {
+      facilityId: facilityId,
+      role: { [Op.ne]: 'developer' }
+    }
+  })
     .then((results) => res.status(200).json({ results }))
     .catch((err) => res.status(500).json({ err }));
 };
@@ -664,56 +666,57 @@ exports.approveUser = (req, res) => {
   User.update({ status: "approved " }, { where: { id } })
     .then((results) => {
       User.findAll({ where: { id } }).then((user) => {
-        const u = user[0].dataValues;
+        // const u = user[0].dataValues;
         // sendMail(u.id, constants.WELCOME_MAIL);
-        transport
-          .sendMail({
-            from: '"MyLikita" <hello@mylikita.clinic>',
-            to: u.email,
-            subject: "[MyLikita] Account Approval",
-            html: `
-          <center>
-            <img src='https://res.cloudinary.com/emaitee/image/upload/v1590845025/logo.png' height='30px' width='100px' />
-          </center>
+        // transport
+        //   .sendMail({
+        //     from: '"MyLikita" <hello@mylikita.clinic>',
+        //     to: u.email,
+        //     subject: "[MyLikita] Account Approval",
+        //     html: `
+        //   <center>
+        //     <img src='https://res.cloudinary.com/emaitee/image/upload/v1590845025/logo.png' height='30px' width='100px' />
+        //   </center>
 
-          <h4>Dear ${u.firstname},</h4>
+        //   <h4>Dear ${u.firstname},</h4>
 
-          <p>
-            Thank you for registering on our platform, we are happy to inform you that your account is
-            now active and you proceed to login <a href="https://app.mylikita.clinic/auth" target="_blank">here</a>
-            with the credentials with which you registered.
-          </p>
-          <p>
-            We welcome you onboard.
-          </p>
-          <p>
-            Feel free to reach out to us for any complaints or questions by replying to this email or
-            sending us an email directly on <a href="mailto:hello@mylikita.clinic">this email address</a>.
-          </p>
-          <br />
+        //   <p>
+        //     Thank you for registering on our platform, we are happy to inform you that your account is
+        //     now active and you proceed to login <a href="https://app.mylikita.clinic/auth" target="_blank">here</a>
+        //     with the credentials with which you registered.
+        //   </p>
+        //   <p>
+        //     We welcome you onboard.
+        //   </p>
+        //   <p>
+        //     Feel free to reach out to us for any complaints or questions by replying to this email or
+        //     sending us an email directly on <a href="mailto:hello@mylikita.clinic">this email address</a>.
+        //   </p>
+        //   <br />
 
-          <p>Best regards.</p>
-          <p>MyLikita Dev. Team</p>
+        //   <p>Best regards.</p>
+        //   <p>MyLikita Dev. Team</p>
 
-          <center>
-            <p style='text-align:center'>Follow us on: </p>
-            <a href="https://www.facebook.com/mylikitaNG" target="_blank">
-              <img src='https://cdn3.iconfinder.com/data/icons/capsocial-round/500/facebook-512.png' height='25px' width='25px' />
-            </a>
-            <a href="https://www.twitter.com/mylikitaNG" target="_blank">
-              <img src='https://cdn4.iconfinder.com/data/icons/social-media-icons-the-circle-set/48/twitter_circle-512.png' height='25px' width='25px' />
-            </a>
-            <a href="https://www.instagram.com/mylikitaNG" target="_blank" >
-              <img src='https://i.pinimg.com/originals/a2/5f/4f/a25f4f58938bbe61357ebca42d23866f.png' height='25px' width='25px' />
-            </a>
-          </center>
-          `,
-          })
-          .then((info) => {
-            console.log("Message sent: %s", info.messageId);
-            res.json({ success: true, results });
-          })
-          .catch((err) => console.log("Error", err));
+        //   <center>
+        //     <p style='text-align:center'>Follow us on: </p>
+        //     <a href="https://www.facebook.com/mylikitaNG" target="_blank">
+        //       <img src='https://cdn3.iconfinder.com/data/icons/capsocial-round/500/facebook-512.png' height='25px' width='25px' />
+        //     </a>
+        //     <a href="https://www.twitter.com/mylikitaNG" target="_blank">
+        //       <img src='https://cdn4.iconfinder.com/data/icons/social-media-icons-the-circle-set/48/twitter_circle-512.png' height='25px' width='25px' />
+        //     </a>
+        //     <a href="https://www.instagram.com/mylikitaNG" target="_blank" >
+        //       <img src='https://i.pinimg.com/originals/a2/5f/4f/a25f4f58938bbe61357ebca42d23866f.png' height='25px' width='25px' />
+        //     </a>
+        //   </center>
+        //   `,
+        //   })
+        //   .then((info) => {
+        //     console.log("Message sent: %s", info.messageId);
+        //     res.json({ success: true, results });
+        //   })
+        //   .catch((err) => console.log("Error", err));
+        res.json({ success: true, results });
       });
     })
     .catch((err) => res.status(500).json({ success: false, err }));
@@ -919,31 +922,7 @@ exports.updateUsers = (req, res) => {
     });
 };
 
-exports.getUnits = (req, res) => {
-  const {
-    department = "",
-    facilityId = "",
-    query_type = "",
-    userId = "",
-  } = req.query;
 
-  db.sequelize
-    .query("CALL department(:query_type, :facilityId, :department, :userId)", {
-      replacements: {
-        department,
-        facilityId,
-        query_type,
-        userId,
-      },
-    })
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false, err });
-    });
-};
 
 exports.resetUserPassword = (req, res) => {
   const { id, newPassword } = req.body;
