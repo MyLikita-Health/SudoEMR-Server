@@ -38,9 +38,6 @@ exports.getNextClientBeneficiaryNo = (req, res) => {
       }
     )
     .then((results) => {
-      console.log("results");
-      console.log(results[0]);
-      console.log("results");
       res.json({ success: true, results: results[0][0] });
     })
     .catch((err) => {
