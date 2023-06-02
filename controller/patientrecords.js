@@ -8,9 +8,9 @@ exports.getPatientList = (req, res) => {
   const { facilityId } = req.params;
   PatientRecords.findAll({
     where: {
-      facilityId
+      facilityId,
     },
-    order: [['accountNo', 'DESC']]
+    order: [["accountNo", "DESC"]],
   })
     .then((results) => res.json({ success: true, results }))
     .catch((err) => res.status(500).json({ err }));
@@ -29,20 +29,22 @@ exports.getNextClientBeneficiaryNo = (req, res) => {
   const { facId, accountNo } = req.params;
   db.sequelize
     .query(
-      "CALL get_beneficiary_no(:accountNo, :facId)",
+      `SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`,
       {
         replacements: {
           facId,
           accountNo,
         },
       }
-      // `select ifnull(max(beneficiaryNo), 0) + 1 AS beneficiaryNo from patientrecords WHERE accountNo=${accountNo} AND facilityId="${facId}"`,
     )
     .then((results) => {
-      console.log(results);
-      res.json({ success: true, results: results[0] });
+      console.log("results");
+      console.log(results[0]);
+      console.log("results");
+      res.json({ success: true, results: results[0][0] });
     })
     .catch((err) => {
+      console.log(err);
       res.json({ success: false, err });
     });
 };
@@ -52,7 +54,7 @@ exports.getApprovedAccounts = (req, res) => {
 
   db.sequelize
     .query(
-      `SELECT accountNo as account_no, concat(surname, ' ', firstname) as account_name, accName as alt_name, contactPhone, 
+      `SELECT accountNo as account_no,"surname || ' ' || firstname"  as account_name, accName as alt_name, contactPhone, 
         contactAddress, guarantor_name,guarantor_phone,guarantor_address
         FROM patientfileno WHERE facilityId="${facilityId}"`
     )
@@ -68,7 +70,7 @@ exports.getNextPatientNo = (req, res) => {
   const { facId } = req.params;
   db.sequelize
     .query(
-      `select ifnull(max(patient_id), 0) + 1 AS id from patientrecords WHERE facilityId="${facId}"`
+      `select ifnull(max(patient_id), 0) + 1 AS id from ss WHERE facilityId="${facId}"`
     )
     .then((results) => {
       res.json({ success: true, results: results[0][0] });
@@ -86,7 +88,7 @@ exports.getPatientInfo = (req, res) => {
       // 'CALL '
       `SELECT a.id AS id, concat(a.firstname, ' ', a.surname) as name, a.dob, a.Gender as gender, 
         ifnull(a.phoneNo,'') as phone, a.email, b.accountNo,b.accountType
-        FROM patientrecords a JOIN patientfileno b ON a.accountNo = b.accountNo
+        FROM ss a JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
@@ -109,7 +111,7 @@ exports.getPatientFullInfo = (req, res) => {
         a.state,a.lga,a.occupation,a.address,a.kinName as nextOfKinName,a.kinRelationship as nextOfKinRelationship,
         a.kinPhone as nextOfKinPhone,a.kinAddress as nextOfKinAddress,
         a.beneficiaryNo as clientBeneficiaryAcc,a.balance
-        FROM patientrecords a JOIN patientfileno b ON a.accountNo = b.accountNo
+        FROM ss a JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
@@ -131,14 +133,9 @@ exports.getUnassignedPatients = (req, res) => {
 exports.patientClarking = (req, res) => {
   const { facilityId } = req.params;
   db.sequelize
-    .query(
-      'select * from patientrecords where id=1 and facilityId="' +
-        facilityId +
-        '"',
-      {
-        type: db.sequelize.QueryTypes.SELECT,
-      }
-    )
+    .query('select * from ss where id=1 and facilityId="' + facilityId + '"', {
+      type: db.sequelize.QueryTypes.SELECT,
+    })
     .then((results) => res.json({ results }))
     .catch((err) => res.status(500).json({ err }));
 };
@@ -161,7 +158,7 @@ exports.getPatientById = (req, res) => {
         DOB as dob,dateCreated,phoneNo as phone,email,state,lga,occupation,address,kinName AS nextOfKinName,
         kinRelationship AS nextOfKinRelationship,kinPhone AS nextOfKinPhone,kinEmail AS nextOfKinEmail,
         kinAddress AS nextOfKinAddress,accountNo,beneficiaryNo,balance,id,patient_id,createdAt,patient_passport
-        FROM patientrecords 
+        FROM ss 
         WHERE id="${id}" AND facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
@@ -237,14 +234,32 @@ exports.getId = (req, res) => {
 
 exports.getAccount = (req, res) => {
   const { facilityId } = req.params;
-  db.sequelize
-    .query("call get_account(:facilityId)", {
-      replacements: { facilityId },
+  PatientRecords.findOne({
+    attributes: [
+      [
+        db.sequelize.fn(
+          "ifnull",
+          db.sequelize.fn("max", db.sequelize.col("accountNo")),
+          0
+        ),
+        "maxAccountNo",
+      ],
+      [db.sequelize.literal("max(accountNo) + 1"), "id"],
+    ],
+    where: {
+      facilityId,
+    },
+    raw: true,
+  })
+    .then((results) => {
+      console.log(results);
+      console.log("results");
+      res.json({ accountNo: results["id"] + 1 });
     })
-    .then((results) =>
-      res.json({ accountNo: results[0]["max(accountNo) + 1"] })
-    )
-    .catch((err) => res.status(500).json({ err }));
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ err });
+    });
 };
 
 // exports.saveNewPatientInfo = (req, res) => {
@@ -305,7 +320,7 @@ exports.newRecord = (req, res) => {
   const today = moment().format("YYYY-MM-DD");
   db.sequelize
     .query(
-      `insert into patientrecords(id,accountNo,beneficiaryNo,title,firstname,surname,other,Gender,age,maritalstatus,DOB,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,dateCreated,enteredBy,facilityId) values(
+      `insert into ss(id,accountNo,beneficiaryNo,title,firstname,surname,other,Gender,age,maritalstatus,DOB,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,dateCreated,enteredBy,facilityId) values(
     "${id}" ,
 	"${accountNo ? accountNo : ""}", 
 	"${beneficiaryNo ? beneficiaryNo : ""}", 
@@ -356,7 +371,7 @@ exports.newRecord = (req, res) => {
 exports.upload = (req, res) => {
   db.sequelize
     .query(
-      'insert into patientrecords(passport) values("' + req.body.fd + '")',
+      'insert into patientrecords (passport) values("' + req.body.fd + '")',
       {
         type: db.sequelize.QueryTypes.INSERT,
       }
@@ -451,7 +466,7 @@ exports.assign = (req, res) => {
     case "waiting":
       PatientRecords.findAll({
         attributes: [
-          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
           "id",
           "date_assigned",
         ],
@@ -467,13 +482,10 @@ exports.assign = (req, res) => {
     case "specialists":
       PatientRecords.findAll({
         attributes: [
-          [sequelize.literal("concat(a.firstname, ' ', a.surname)"), "name"],
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
           "a.id",
           "date_assigned",
-          [
-            sequelize.literal("concat(b.firstname, ' ', b.lastname)"),
-            "doctorName",
-          ],
+          [db.sequelize.literal("surname || ' ' || firstname"), "doctorName"],
         ],
         include: [
           {
@@ -496,7 +508,7 @@ exports.assign = (req, res) => {
     case "by_doc":
       PatientRecords.findAll({
         attributes: [
-          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
           "id",
           "date_assigned",
         ],
@@ -546,7 +558,7 @@ exports.assignQuery = (req, res) => {
     case "waiting":
       PatientRecords.findAll({
         attributes: [
-          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
           "id",
           "date_assigned",
         ],
@@ -562,13 +574,10 @@ exports.assignQuery = (req, res) => {
     case "specialists":
       PatientRecords.findAll({
         attributes: [
-          [sequelize.literal("concat(a.firstname, ' ', a.surname)"), "name"],
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
           "a.id",
           "date_assigned",
-          [
-            sequelize.literal("concat(b.firstname, ' ', b.lastname)"),
-            "doctorName",
-          ],
+          [db.sequelize.literal("surname || ' ' || firstname"), "doctorName"],
         ],
         include: [
           {
@@ -591,7 +600,7 @@ exports.assignQuery = (req, res) => {
     case "by_doc":
       PatientRecords.findAll({
         attributes: [
-          [sequelize.literal("concat(firstname, ' ', surname)"), "name"],
+          [db.sequelize.literal("surname || ' ' || firstname"), "name"],
           "id",
           "date_assigned",
         ],
@@ -710,10 +719,13 @@ exports.getIds = (req, res) => {
 
 exports.getBeneficiaryNo = (req, res) => {
   const { accountNo, facilityId } = req.params;
-  db.sequelize
-    .query("call get_beneficiary_no(:accountNo,:facilityId)", {
-      replacements: { accountNo, facilityId },
-    })
+  PatientRecords.findOne({
+    attributes: [[db.sequelize.literal(`count(id) + 1`), "beneficiaryNo"]],
+    where: {
+      accountNo,
+      facilityId,
+    },
+  })
     .then((results) => res.json({ beneficiaryNo: results[0].beneficiaryNo }))
     .catch((err) => res.status(500).json({ err }));
 };
