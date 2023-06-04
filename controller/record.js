@@ -45,44 +45,10 @@ exports.saveRecordInfo = (req, res) => {
     txn_status = "completed",
   } = req.body;
   const patient_passport = req.file && req.file.filename;
-  db.sequelize
-    .query(
-      `CALL customer_deposit(:patientId,:amount,:userId,:receiptsn,:receiptno,:description,:payment_mode,:facId,:destination,:name,:type,:in_date,:address,:phone,:email,:web,:paybles_head,:recievables_head,:guarantor_name,:guarantor_address,:guarantor_phoneNo,:bankName,:pid,:txn_status)`,
-      {
-        replacements: {
-          patientId: clientAccount,
-          pid: patientId ? patientId : clientAccount,
-          amount: depositAmount && depositAmount !== "" ? depositAmount : 0,
-          userId,
-          receiptsn,
-          receiptno,
-          description,
-          payment_mode: modeOfPayment,
-          bankName: bankName ? bankName : "",
-          facId: facilityId,
-          destination:
-            modeOfPayment.toLowerCase() === "cash" ? "400021" : "400022",
-          type: accountType,
-          name: `${surname} ${firstname}`,
-          in_date: moment().format("YYYY-MM-DD hh:mm:ss"),
-          address: contact === "self" ? address : contactAddress,
-          phone: contactPhone ? contactPhone : phone,
-          web: website ? website : "",
-          email: contactEmail ? contactEmail : "",
-          paybles_head: "500021",
-          recievables_head: "400023",
-          guarantor_name: guarantor_name ? guarantor_name : "",
-          guarantor_address: guarantor_address ? guarantor_address : "",
-          guarantor_phoneNo: guarantor_phoneNo ? guarantor_phoneNo : "",
-          bankName: bankName ? bankName : "",
-          txn_status,
-        },
-      }
-    )
-    .then(() => {
+ 
       db.sequelize
         .query(
-          "CALL get_beneficiary_no(:accountNo, :facId)",
+          "CALL get_beneficiary_no(`SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`)",
           {
             replacements: {
               accountNo: clientAccount,
@@ -92,7 +58,7 @@ exports.saveRecordInfo = (req, res) => {
           // `select ifnull(max(beneficiaryNo), 0) + 1 AS beneficiaryNo from patientrecords WHERE accountNo=${accountNo} AND facilityId="${facId}"`,
         )
         .then((results) => {
-          let nextPatientNo = results[0].beneficiaryNo;
+          let nextPatientNo = results[0][0].beneficiaryNo;
           console.log("LDLLLLDLLDLDLDL", results);
           db.sequelize
             .query(
@@ -118,11 +84,6 @@ exports.saveRecordInfo = (req, res) => {
           console.log(err);
           res.status(500).json({ success: false, err });
         });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false, err });
-    });
 };
 
 exports.getPatients = (req, res) => {
