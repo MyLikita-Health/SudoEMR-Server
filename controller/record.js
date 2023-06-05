@@ -48,14 +48,14 @@ exports.saveRecordInfo = (req, res) => {
  
       db.sequelize
         .query(
-          "CALL get_beneficiary_no(`SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`)",
+          `SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`,
           {
             replacements: {
               accountNo: clientAccount,
               facId: facilityId,
             },
           }
-          // `select ifnull(max(beneficiaryNo), 0) + 1 AS beneficiaryNo from patientrecords WHERE accountNo=${accountNo} AND facilityId="${facId}"`,
+          
         )
         .then((results) => {
           let nextPatientNo = results[0][0].beneficiaryNo;
