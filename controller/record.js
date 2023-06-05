@@ -71,6 +71,7 @@ exports.saveRecordInfo = (req, res) => {
     guarantor_address = "",
     txn_status = "completed",
   } = req.body;
+  console.log(req.body)
   const patient_passport = req.file && req.file.filename;
   customerDeposit(
     patientId,
@@ -80,20 +81,48 @@ exports.saveRecordInfo = (req, res) => {
         depositAmount && depositAmount !== "" ? depositAmount : 0;
       if (result === null && amount_paid < 0) {
         PatientFileNo.create({
-          accountNo:patientId,
-          accName:patient,
-          balance,
+          accountNo: patientId,
+          accName: `${surname} ${firstname}`,
+          balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
           facilityId,
-          status:'approved',
+          status: "approved",
           accountType,
           contactAddress,
           contactPhone,
           contactEmail,
-          contactWebsite,
+          contactWebsite: website,
           guarantor_name,
           guarantor_address,
-          guarantor_phone,
-        });
+          guarantor_phone: guarantor_phoneNo,
+        })
+          .then((result) => {
+            console.log(result);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else if (result === null) {
+        PatientFileNo.create({
+          accountNo: patientId,
+          accName: `${surname} ${firstname}`,
+          balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
+          facilityId,
+          status: "approved",
+          accountType,
+          contactAddress,
+          contactPhone,
+          contactEmail,
+          contactWebsite: website,
+          guarantor_name,
+          guarantor_address,
+          guarantor_phone: guarantor_phoneNo,
+        })
+          .then((result) => {
+            console.log(result);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
     },
     (err) => {
