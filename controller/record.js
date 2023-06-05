@@ -1,6 +1,7 @@
 const db = require("../models");
 const moment = require("moment");
 const PatientRecords = db.patientrecords;
+const PatientFileNo =db.patientfileno
 const BedList = db.bedlist;
 const { Op } = require("sequelize");
 
@@ -71,7 +72,18 @@ exports.saveRecordInfo = (req, res) => {
     txn_status = "completed",
   } = req.body;
   const patient_passport = req.file && req.file.filename;
-  customerDeposit()
+  customerDeposit(
+    patientId,
+    facilityId,
+    (result) => {
+      if (result ===null){
+        
+      }
+    },
+    (err) => {
+      console.log(err);
+    }
+  );
   db.sequelize
     .query(
       `SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`,
