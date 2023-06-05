@@ -51,7 +51,7 @@ exports.getApprovedAccounts = (req, res) => {
 
   db.sequelize
     .query(
-      `SELECT accountNo as account_no,"surname || ' ' || firstname"  as account_name, accName as alt_name, contactPhone, 
+      `SELECT accountNo as account_no,surname || ' ' || firstname  as account_name, accName as alt_name, contactPhone, 
         contactAddress, guarantor_name,guarantor_phone,guarantor_address
         FROM patientfileno WHERE facilityId="${facilityId}"`
     )

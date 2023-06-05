@@ -46,7 +46,7 @@ exports.saveRecordInfo = (req, res) => {
     guarantor_address = "",
     txn_status = "completed",
   } = req.body;
-
+  const patient_passport = req.file && req.file.filename;
   PatientFileNo.create({
     accountNo: clientAccount,
     accName: `${surname} ${firstname}`,
@@ -62,8 +62,10 @@ exports.saveRecordInfo = (req, res) => {
     guarantor_name,
     guarantor_address,
     guarantor_phone: guarantor_phoneNo,
+    firstname,
+    surname,
   })
-    .then((res) => {
+    .then((_res) => {
       db.sequelize
         .query(
           `SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`,
@@ -79,7 +81,7 @@ exports.saveRecordInfo = (req, res) => {
           console.log("LDLLLLDLLDLDLDL", results);
           db.sequelize
             .query(
-              `INSERT INTO patientrecords(facilityId,title,surname,firstname,other,Gender,age,maritalstatus,DOB,dateCreated,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,accountNo,beneficiaryNo,balance,id, accountType,patient_passport,createdAt,updatedAt) VALUES ("${facilityId}","","${surname}","${firstname}","${contactName}","${gender}",0,"${maritalStatus}","${dob}","${moment().format(
+              `INSERT INTO patientrecords(patient_id,facilityId,title,surname,firstname,other,Gender,age,maritalstatus,DOB,dateCreated,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,accountNo,beneficiaryNo,balance,id, accountType,patient_passport,createdAt,updatedAt) VALUES ("${clientAccount}","${facilityId}","","${surname}","${firstname}","${contactName}","${gender}",0,"${maritalStatus}","${dob}","${moment().format(
                 "YYYY-MM-DD"
               )}","${phone}","${email}","","","${occupation}","${
                 contact === "self" ? address : contactAddress
