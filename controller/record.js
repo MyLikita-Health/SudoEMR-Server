@@ -71,25 +71,32 @@ exports.saveRecordInfo = (req, res) => {
     guarantor_address = "",
     txn_status = "completed",
   } = req.body;
-  console.log(req.body)
+  console.log(req.body);
   const patient_passport = req.file && req.file.filename;
   customerDeposit(
-    patientId,
+    1,
     facilityId,
     (result) => {
+      const main_balance =
+        depositAmount && depositAmount !== ""
+          ? depositAmount
+          : 0 + result !== null
+          ? result.balance
+          : 0;
       const amount_paid =
         depositAmount && depositAmount !== "" ? depositAmount : 0;
       if (result === null && amount_paid < 0) {
         PatientFileNo.create({
-          accountNo: patientId,
+          accountNo: clientAccount,
           accName: `${surname} ${firstname}`,
           balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
           facilityId,
           status: "approved",
           accountType,
-          contactAddress,
-          contactPhone,
-          contactEmail,
+          contactAddress: address,
+          contactName: `${surname} ${firstname}`,
+          contactPhone: phone,
+          contactEmail: email,
           contactWebsite: website,
           guarantor_name,
           guarantor_address,
@@ -103,15 +110,16 @@ exports.saveRecordInfo = (req, res) => {
           });
       } else if (result === null) {
         PatientFileNo.create({
-          accountNo: patientId,
+          accountNo: clientAccount,
           accName: `${surname} ${firstname}`,
           balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
           facilityId,
           status: "approved",
           accountType,
-          contactAddress,
-          contactPhone,
-          contactEmail,
+          contactAddress: address,
+          contactName: `${surname} ${firstname}`,
+          contactPhone: phone,
+          contactEmail: email,
           contactWebsite: website,
           guarantor_name,
           guarantor_address,
@@ -124,6 +132,12 @@ exports.saveRecordInfo = (req, res) => {
             console.log(err);
           });
       }
+      PatientFileNo.update(
+        {
+          balance: main_balance,
+        },
+        { where: { accountNo: clientAccount, facilityId } }
+      );
     },
     (err) => {
       console.log(err);
@@ -209,8 +223,8 @@ exports.getPatients = (req, res) => {
         "accountType",
       ],
       where: {
-        facilityId: _facility_id,
-        id: _patient_id,
+        facilityId: facilityId,
+        id: patient_id,
       },
     })
       .then((resp) => {
