@@ -1,7 +1,7 @@
 const db = require("../models");
 const moment = require("moment");
 const PatientRecords = db.patientrecords;
-const PatientFileNo =db.patientfileno
+const PatientFileNo = db.patientfileno;
 const BedList = db.bedlist;
 const { Op } = require("sequelize");
 
@@ -76,8 +76,24 @@ exports.saveRecordInfo = (req, res) => {
     patientId,
     facilityId,
     (result) => {
-      if (result ===null){
-        
+      const amount_paid =
+        depositAmount && depositAmount !== "" ? depositAmount : 0;
+      if (result === null && amount_paid < 0) {
+        PatientFileNo.create({
+          accountNo:patientId,
+          accName:patient,
+          balance,
+          facilityId,
+          status:'approved',
+          accountType,
+          contactAddress,
+          contactPhone,
+          contactEmail,
+          contactWebsite,
+          guarantor_name,
+          guarantor_address,
+          guarantor_phone,
+        });
       }
     },
     (err) => {
