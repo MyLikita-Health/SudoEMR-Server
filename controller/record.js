@@ -5,31 +5,6 @@ const PatientFileNo = db.patientfileno;
 const BedList = db.bedlist;
 const { Op } = require("sequelize");
 
-const customerDeposit = async (
-  in_acct,
-  in_facId,
-  success = (f) => f,
-  error = (f) => f
-) => {
-  try {
-    PatientFileNo.findOne({
-      attributes: ["balance"],
-      where: {
-        accountNo: in_acct,
-        facilityId: in_facId,
-      },
-      raw: true,
-      limit: 1,
-    })
-      .then((result) => {
-        success(result);
-      })
-      .catch((err) => {
-        error(err); // Handle any errors that occur
-      });
-  } catch (error) {}
-};
-
 exports.saveRecordInfo = (req, res) => {
   const {
     accountType = "",
@@ -71,105 +46,56 @@ exports.saveRecordInfo = (req, res) => {
     guarantor_address = "",
     txn_status = "completed",
   } = req.body;
-  console.log(req.body);
-  const patient_passport = req.file && req.file.filename;
-  customerDeposit(
-    1,
+
+  PatientFileNo.create({
+    accountNo: clientAccount,
+    accName: `${surname} ${firstname}`,
+    balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
     facilityId,
-    (result) => {
-      const main_balance =
-        depositAmount && depositAmount !== ""
-          ? depositAmount
-          : 0 + result !== null
-          ? result.balance
-          : 0;
-      const amount_paid =
-        depositAmount && depositAmount !== "" ? depositAmount : 0;
-      if (result === null && amount_paid < 0) {
-        PatientFileNo.create({
-          accountNo: clientAccount,
-          accName: `${surname} ${firstname}`,
-          balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
-          facilityId,
-          status: "approved",
-          accountType,
-          contactAddress: address,
-          contactName: `${surname} ${firstname}`,
-          contactPhone: phone,
-          contactEmail: email,
-          contactWebsite: website,
-          guarantor_name,
-          guarantor_address,
-          guarantor_phone: guarantor_phoneNo,
-        })
-          .then((result) => {
-            console.log(result);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else if (result === null) {
-        PatientFileNo.create({
-          accountNo: clientAccount,
-          accName: `${surname} ${firstname}`,
-          balance: depositAmount && depositAmount !== "" ? depositAmount : 0,
-          facilityId,
-          status: "approved",
-          accountType,
-          contactAddress: address,
-          contactName: `${surname} ${firstname}`,
-          contactPhone: phone,
-          contactEmail: email,
-          contactWebsite: website,
-          guarantor_name,
-          guarantor_address,
-          guarantor_phone: guarantor_phoneNo,
-        })
-          .then((result) => {
-            console.log(result);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-      PatientFileNo.update(
-        {
-          balance: main_balance,
-        },
-        { where: { accountNo: clientAccount, facilityId } }
-      );
-    },
-    (err) => {
-      console.log(err);
-    }
-  );
-  db.sequelize
-    .query(
-      `SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`,
-      {
-        replacements: {
-          accountNo: clientAccount,
-          facId: facilityId,
-        },
-      }
-    )
-    .then((results) => {
-      let nextPatientNo = results[0][0].beneficiaryNo;
-      console.log("LDLLLLDLLDLDLDL", results);
+    status: "approved",
+    accountType,
+    contactAddress: address,
+    contactName: `${surname} ${firstname}`,
+    contactPhone: phone,
+    contactEmail: email,
+    contactWebsite: website,
+    guarantor_name,
+    guarantor_address,
+    guarantor_phone: guarantor_phoneNo,
+  })
+    .then((res) => {
       db.sequelize
         .query(
-          `INSERT INTO patientrecords(facilityId,title,surname,firstname,other,Gender,age,maritalstatus,DOB,dateCreated,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,accountNo,beneficiaryNo,balance,id, accountType,patient_passport,createdAt,updatedAt) VALUES ("${facilityId}","","${surname}","${firstname}","${contactName}","${gender}",0,"${maritalStatus}","${dob}","${moment().format(
-            "YYYY-MM-DD"
-          )}","${phone}","${email}","","","${occupation}","${
-            contact === "self" ? address : contactAddress
-          }","${nextOfKinName}","${nextOfKinRelationship}","${nextOfKinPhone}","${nextOfKinEmail}","${nextOfKinAddress}","${clientAccount}","${nextPatientNo}",0,"${
-            clientAccount + "-" + nextPatientNo
-          }", "${accountType}", "${patient_passport}","${moment().format(
-            "YYYY-MM-DD hh:mm:ss"
-          )}",'0000-00-00 00-00-00')`
+          `SELECT count(id) + 1 as beneficiaryNo FROM patientrecords  WHERE patientrecords.accountNo = :accountNo AND patientrecords.facilityId = :facId;`,
+          {
+            replacements: {
+              accountNo: clientAccount,
+              facId: facilityId,
+            },
+          }
         )
-        .then((result) => {
-          res.json({ success: true, result });
+        .then((results) => {
+          let nextPatientNo = results[0][0].beneficiaryNo;
+          console.log("LDLLLLDLLDLDLDL", results);
+          db.sequelize
+            .query(
+              `INSERT INTO patientrecords(facilityId,title,surname,firstname,other,Gender,age,maritalstatus,DOB,dateCreated,phoneNo,email,state,lga,occupation,address,kinName,kinRelationship,kinPhone,kinEmail,kinAddress,accountNo,beneficiaryNo,balance,id, accountType,patient_passport,createdAt,updatedAt) VALUES ("${facilityId}","","${surname}","${firstname}","${contactName}","${gender}",0,"${maritalStatus}","${dob}","${moment().format(
+                "YYYY-MM-DD"
+              )}","${phone}","${email}","","","${occupation}","${
+                contact === "self" ? address : contactAddress
+              }","${nextOfKinName}","${nextOfKinRelationship}","${nextOfKinPhone}","${nextOfKinEmail}","${nextOfKinAddress}","${clientAccount}","${nextPatientNo}",0,"${
+                clientAccount + "-" + nextPatientNo
+              }", "${accountType}", "${patient_passport}","${moment().format(
+                "YYYY-MM-DD hh:mm:ss"
+              )}",'0000-00-00 00-00-00')`
+            )
+            .then((result) => {
+              res.json({ success: true, result });
+            })
+            .catch((err) => {
+              console.log(err);
+              res.status(500).json({ success: false, err });
+            });
         })
         .catch((err) => {
           console.log(err);
