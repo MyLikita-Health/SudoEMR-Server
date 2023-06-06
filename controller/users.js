@@ -36,16 +36,18 @@ exports.create = (req, res) => {
     functionality,
     userId,
     phone,
-    status
+    status,
   } = req.body;
   // check validations
   if (!isValid) {
     return res.status(400).json({ errors });
   }
-  
+
   User.findAll({ where: { username } }).then((user) => {
     if (user.length && username !== "") {
-      return res.status(400).json({ message: "Username already exists!",success:false });
+      return res
+        .status(400)
+        .json({ message: "Username already exists!", success: false });
     } else {
       let newUser = {
         firstname,
@@ -72,12 +74,12 @@ exports.create = (req, res) => {
           newUser.password = hash;
           User.create(newUser)
             .then((user) => {
-              res.json({ user,success:true });
+              res.json({ user, success: true });
             })
             .catch((err) => {
-              console.log(err)
-              console.log("herrererereerreerreererer")
-              res.status(500).json({ err,success:false });
+              console.log(err);
+              console.log("herrererereerreerreererer");
+              res.status(500).json({ err, success: false });
             });
         });
       });
@@ -128,7 +130,7 @@ exports.login = (req, res) => {
               },
               (err, token) => {
                 // let accessTo = [],
-                console.log(user[0].dataValues)
+                console.log(user[0].dataValues);
                 return res.status(200).json({
                   success: true,
                   token: "Bearer " + token,
@@ -275,8 +277,8 @@ exports.findAllUsers = (req, res) => {
   User.findAll({
     where: {
       facilityId: facilityId,
-      role: { [Op.ne]: 'developer' }
-    }
+      role: { [Op.ne]: "developer" },
+    },
   })
     .then((results) => res.status(200).json({ results }))
     .catch((err) => res.status(500).json({ err }));
@@ -381,14 +383,37 @@ exports.getRoles = (req, res) => {
 exports.getDoctors = (req, res) => {
   const { facilityId } = req.params;
   const { query_type = "" } = req.query;
-  db.sequelize
-    .query("call get_doctors(:facilityId,:query_type)", {
-      replacements: { facilityId, query_type },
-    })
-    .then((results) => {
-      res.status(200).json({ results });
-    })
-    .catch((err) => res.status(500).json({ err }));
+  switch (query_type) {
+    case "specialist":
+      db.sequelize.query(
+        `SELECT * FROM users WHERE role = 'doctor' AND speciality != 'General' AND facilityId=:facId;`,
+        {
+          replacements: {
+            facId: facilityId,
+          },
+        }
+      )
+        .then((results) => {
+          res.status(200).json({ results,success:true });
+        })
+        .catch((err) => res.status(500).json({ err,success:false }));
+      break;
+
+    default:
+      db.sequelize.query(
+        `SELECT * FROM users WHERE role = 'doctor' AND facilityId=:facId;`,
+        {
+          replacements: {
+            facId: facilityId,
+          },
+        }
+      )
+        .then((results) => {
+          res.status(200).json({ results,success:true });
+        })
+        .catch((err) => res.status(500).json({ err,success:false }));
+      break;
+  }
 };
 
 exports.createDoctor = (req, res) => {
@@ -921,8 +946,6 @@ exports.updateUsers = (req, res) => {
       res.status(500).json({ err });
     });
 };
-
-
 
 exports.resetUserPassword = (req, res) => {
   const { id, newPassword } = req.body;

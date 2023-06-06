@@ -85,7 +85,7 @@ exports.getPatientInfo = (req, res) => {
       // 'CALL '
       `SELECT a.id AS id, concat(a.firstname, ' ', a.surname) as name, a.dob, a.Gender as gender, 
         ifnull(a.phoneNo,'') as phone, a.email, b.accountNo,b.accountType
-        FROM ss a JOIN patientfileno b ON a.accountNo = b.accountNo
+        FROM ss  JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
