@@ -386,7 +386,7 @@ exports.getDoctors = (req, res) => {
   switch (query_type) {
     case "specialist":
       db.sequelize.query(
-        `SELECT * FROM users WHERE role = 'doctor' AND speciality != 'General' AND facilityId=:facId;`,
+        `SELECT * FROM users WHERE role = 'doctor' AND speciality != 'General' AND facilityId=:facId ;`,
         {
           replacements: {
             facId: facilityId,
@@ -394,14 +394,15 @@ exports.getDoctors = (req, res) => {
         }
       )
         .then((results) => {
-          res.status(200).json({ results,success:true });
+          console.log(results)
+          res.status(200).json({ results:results[0],success:true });
         })
         .catch((err) => res.status(500).json({ err,success:false }));
       break;
 
     default:
       db.sequelize.query(
-        `SELECT * FROM users WHERE role = 'doctor' AND facilityId=:facId;`,
+        `SELECT * FROM users WHERE role = 'doctor' AND facilityId=:facId `,
         {
           replacements: {
             facId: facilityId,
@@ -409,7 +410,8 @@ exports.getDoctors = (req, res) => {
         }
       )
         .then((results) => {
-          res.status(200).json({ results,success:true });
+          res.status(200).json({ results:results[0],success:true });
+          console.log(results)
         })
         .catch((err) => res.status(500).json({ err,success:false }));
       break;

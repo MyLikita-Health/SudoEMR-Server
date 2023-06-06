@@ -130,7 +130,7 @@ exports.getUnassignedPatients = (req, res) => {
 exports.patientClarking = (req, res) => {
   const { facilityId } = req.params;
   db.sequelize
-    .query('select * from ss where id=1 and facilityId="' + facilityId + '"', {
+    .query('select * from patientrecords where id=1 and facilityId="' + facilityId + '"', {
       type: db.sequelize.QueryTypes.SELECT,
     })
     .then((results) => res.json({ results }))
@@ -155,7 +155,7 @@ exports.getPatientById = (req, res) => {
         DOB as dob,dateCreated,phoneNo as phone,email,state,lga,occupation,address,kinName AS nextOfKinName,
         kinRelationship AS nextOfKinRelationship,kinPhone AS nextOfKinPhone,kinEmail AS nextOfKinEmail,
         kinAddress AS nextOfKinAddress,accountNo,beneficiaryNo,balance,id,patient_id,createdAt,patient_passport
-        FROM ss 
+        FROM patientrecords 
         WHERE id="${id}" AND facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
