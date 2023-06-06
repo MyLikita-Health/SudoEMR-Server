@@ -67,7 +67,7 @@ exports.getNextPatientNo = (req, res) => {
   const { facId } = req.params;
   db.sequelize
     .query(
-      `select ifnull(max(patient_id), 0) + 1 AS id from ss WHERE facilityId="${facId}"`
+      `select ifnull(max(patient_id), 0) + 1 AS id from patientrecords WHERE facilityId="${facId}"`
     )
     .then((results) => {
       res.json({ success: true, results: results[0][0] });
@@ -85,7 +85,7 @@ exports.getPatientInfo = (req, res) => {
       // 'CALL '
       `SELECT a.id AS id, concat(a.firstname, ' ', a.surname) as name, a.dob, a.Gender as gender, 
         ifnull(a.phoneNo,'') as phone, a.email, b.accountNo,b.accountType
-        FROM ss  JOIN patientfileno b ON a.accountNo = b.accountNo
+        FROM patientrecords  JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
@@ -108,7 +108,7 @@ exports.getPatientFullInfo = (req, res) => {
         a.state,a.lga,a.occupation,a.address,a.kinName as nextOfKinName,a.kinRelationship as nextOfKinRelationship,
         a.kinPhone as nextOfKinPhone,a.kinAddress as nextOfKinAddress,
         a.beneficiaryNo as clientBeneficiaryAcc,a.balance
-        FROM ss a JOIN patientfileno b ON a.accountNo = b.accountNo
+        FROM patientrecords a JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))
