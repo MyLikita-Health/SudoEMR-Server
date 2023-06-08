@@ -100,6 +100,64 @@ exports.newDiagnosis = (req, res) => {
     .catch((err) => res.status(500).json({ err }));
 };
 
+const consultationRecord = () => {
+  const today = moment().format("YYYY-MM-DD");
+  const {
+    query_type = "list",
+    report_type = "by_date",
+    presenting_complaints = "",
+    patientStatus = "",
+    dressingInfo = "",
+    facilityId = "",
+    consult_id = "",
+    patient_id = "",
+    treatmentPlan = "",
+    report_date = today,
+    admissionStatus = "",
+    userId = null,
+    nursingReq = null,
+    dateFrom = today,
+    dateTo = today,
+    patient_name = "",
+    created_by = "",
+  } = req.query;
+  switch (query_type) {
+    case "insert":
+      db.sequelize
+        .query(
+          `INSERT INTO consultations (id, consultation_notes,userId, decision, dressing_request, nursing_request,facilityId,patient_id,treatmentPlan,patient_name,seen_by,created_at,) 
+        VALUES ("${consult_id}", "${presenting_complaints}", "${userId}", "${patientStatus}", "${dressingInfo}", "${nursingReq}","${facilityId}","${patient_id}","${treatmentPlan}","${patient_name}","${created_by}","${report_date}");`
+        )
+        .then((results) => {
+          if (admissionStatus === "pending") {
+            db.sequelize
+              .query(
+                `UPDATE patientrecords SET patientStatus='pending-admission', seen_by="${userId}", date_seen="${report_date}" WHERE id='${patient_id}' AND facilityId="${facilityId}";`
+              )
+              .then((results) => {
+                res.json({ success: true, results });
+              })
+              .catch((err) => {
+                console.log(err);
+                res.status(500).json({ success: false, err });
+              });
+          } else {
+            res.json({ success: true, results });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+
+      break;
+        case "update":
+        break;
+    default:
+      break;
+  }
+};
+
 exports.getConsultation = (req, res) => {
   const today = moment().format("YYYY-MM-DD");
   const {
@@ -119,7 +177,7 @@ exports.getConsultation = (req, res) => {
     dateFrom = today,
     dateTo = today,
     patient_name = "",
-    created_by=''
+    created_by = "",
   } = req.query;
   // console.log(req.query)
   db.sequelize
@@ -145,7 +203,7 @@ exports.getConsultation = (req, res) => {
           dateFrom,
           dateTo,
           patient_name,
-          created_by
+          created_by,
         },
       }
     )
@@ -226,7 +284,7 @@ exports.consultationRecord = (req, res) => {
     dateFrom = today,
     dateTo = today,
     patient_name = "",
-    created_by=""
+    created_by = "",
   } = req.body;
   console.log(req.body);
   // console.log(req.body.labInvestigations.detail);
@@ -253,7 +311,7 @@ exports.consultationRecord = (req, res) => {
           dateFrom,
           dateTo,
           patient_name,
-          created_by
+          created_by,
         },
       }
     )
