@@ -67,32 +67,111 @@ exports.appointment = (req, res) => {
     id = null,
   } = req.body;
   console.log(req.body);
-  db.sequelize
-    .query(
-      "CALL appointment(:user_id,:patientId, :patient_name, :appointmentType, :location, :notes, :start_at, :end_at,:facilityId,:query_type,:id)",
-      {
-        replacements: {
-          user_id,
-          patientId,
-          patient_name,
-          appointmentType,
-          location,
-          notes,
-          start_at,
-          end_at,
-          query_type,
-          facilityId,
-          id,
-        },
-      }
-    )
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      res.status(500).json({ success: false, err });
-      console.log(err);
-    });
+
+  switch (query_type) {
+    case "insert":
+      db.sequelize
+        .query(
+          `INSERT INTO appointment(user_id,patientId, patient_name, appointmentType, location, notes, start_at, end_at, facilityId) 
+        VALUES (:user_id,:patient_id,:patient_name,:appointType,:loc,:notes,:start_at,:end_at,:facilityId);`,
+          {
+            replacements: {
+              user_id,
+              patientId,
+              patient_name,
+              appointType: appointmentType,
+              loc: location,
+              notes,
+              start_at,
+              end_at,
+              facilityId,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    case "select":
+      db.sequelize
+        .query(
+          `SELECT * from appointment WHERE facilityId=:facId AND user_id=:user_id;`,
+          {
+            replacements: {
+              facId: facilityId,
+              user_id,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    case "select_user":
+      db.sequelize
+        .query(
+          `SELECT * from appointment WHERE facilityId=:facId AND patientId=:patient_id;`,
+          {
+            replacements: {
+              facId: facilityId,
+              patientId,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    case "select_one":
+      db.sequelize
+        .query(
+          `SELECT * from appointment WHERE id=:id AND facilityId=:facId;`,
+          {
+            replacements: {
+              id,
+              facId: facilityId,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    case "delete":
+      db.sequelize
+        .query(`DELETE from appointment WHERE id=:id AND facilityId=:facId;`, {
+          replacements: {
+            id,
+            facId: facilityId,
+          },
+        })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    default:
+      break;
+  }
 };
 
 exports.medical_report = (req, res) => {

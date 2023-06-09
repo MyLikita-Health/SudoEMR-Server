@@ -100,7 +100,7 @@ exports.newDiagnosis = (req, res) => {
     .catch((err) => res.status(500).json({ err }));
 };
 
-const consultationRecord = () => {
+exports._consultationRecord = (req, res) => {
   const today = moment().format("YYYY-MM-DD");
   const {
     query_type = "list",
@@ -125,7 +125,7 @@ const consultationRecord = () => {
     case "insert":
       db.sequelize
         .query(
-          `INSERT INTO consultations (id, consultation_notes,userId, decision, dressing_request, nursing_request,facilityId,patient_id,treatmentPlan,patient_name,seen_by,created_at,) 
+          `INSERT INTO consultations (id, consultation_notes,userId, decision, dressing_request, nursing_request,facilityId,patient_id,treatmentPlan,patient_name,seen_by,created_at) 
         VALUES ("${consult_id}", "${presenting_complaints}", "${userId}", "${patientStatus}", "${dressingInfo}", "${nursingReq}","${facilityId}","${patient_id}","${treatmentPlan}","${patient_name}","${created_by}","${report_date}");`
         )
         .then((results) => {
@@ -151,8 +151,223 @@ const consultationRecord = () => {
         });
 
       break;
-        case "update":
-        break;
+    case "update":
+      db.sequelize
+        .query(
+          `UPDATE consultations SET consultation_notes=:consultation_note, treatmentPlan=:treatment_plan, updatedAt=:date WHERE id=:consult_id;`,
+          {
+            replacements: {
+              consultation_note: presenting_complaints,
+              treatmentPlan: treatmentPlan,
+              date: report_date,
+              consult_id: consult_id,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results: results });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "list by patient":
+      if (report_type === "by_date") {
+        db.sequelize
+          .query(
+            `SELECT a.id, a.patient_id, a.userId, b.firstname ||' '|| b.lastname as reviewedBy, a.consultation_notes, a.treatmentPlan, a.decision, a.dressing_request, a.nursing_request, a.nursing_request_status, a.facilityId, a.created_at FROM consultations a JOIN users b ON a.userId = b.username WHERE patient_id=:pid AND date(a.created_at)=:report_date ORDER BY a.created_at DESC;`,
+            {
+              replacements: {
+                pid: patient_id,
+                report_date: report_date,
+              },
+            }
+          )
+          .then((results) => {
+            res.json({ success: true, results: results[0] });
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json({ success: false, err });
+          });
+      } else {
+        db.sequelize
+          .query(
+            `SELECT a.id, a.patient_id, a.userId, b.firstname ||' '|| b.lastname as reviewedBy, a.consultation_notes, a.treatmentPlan, a.decision, a.dressing_request, a.nursing_request, a.nursing_request_status, a.facilityId, a.created_at FROM consultations a JOIN users b ON a.userId = b.username WHERE patient_id=:pid ORDER BY created_at DESC;`,
+            {
+              replacements: {
+                pid: patient_id,
+              },
+            }
+          )
+          .then((results) => {
+            res.json({ success: true, results: results[0] });
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json({ success: false, err });
+          });
+      }
+      break;
+    case "by_id":
+      db.sequelize
+        .query(` SELECT * FROM consultations WHERE id=:consult_id;`, {
+          replacements: {
+            consult_id,
+          },
+        })
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "pending nursing requests":
+      db.sequelize
+        .query(
+          ` SELECT id, nursing_request,dressing_request, nursing_request_status,treatmentPlan FROM consultations WHERE nursing_request_status='pending' AND facilityId=:facilityId`,
+          {
+            replacements: {
+              facilityId,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "nursing_req_by_patient":
+      db.sequelize
+        .query(
+          `SELECT a.id, a.created_at, nursing_request,dressing_request, nursing_request_status, b.firstname||' '||b.lastname as doctor_name FROM consultations a JOIN users b ON a.userId = b.username WHERE a.facilityId=b.facilityId AND patient_id=:pid AND nursing_request_status='pending' AND  a.facilityId=:facilityId AND (nursing_request!='' OR dressing_request!='') ORDER BY a.created_at DESC;`,
+          {
+            replacements: {
+              facilityId,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "treatment_plan_by_patient":
+      db.sequelize
+        .query(
+          `SELECT a.id, a.created_at, treatmentPlan, b.firstname ||' '|| b.lastname as doctor_name FROM consultations a JOIN users b ON a.userId = b.username WHERE a.facilityId=b.facilityId AND patient_id=in_pid AND treatment_plan_status='pending' AND  a.facilityId=:facilityId AND treatmentPlan!='' ORDER BY a.created_at DESC;`,
+          {
+            replacements: {
+              facilityId,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "complete nursing req":
+      db.sequelize
+        .query(
+          `UPDATE consultations SET nursing_request_status='completed',updatedAt=:date WHERE id=:consult_id;`,
+          {
+            replacements: {
+              consult_id,
+              date: report_date,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "treatment-done":
+      db.sequelize
+        .query(
+          `UPDATE consultations SET treatment_plan_status='completed', treatment_by=in_user_id,updatedAt=:date WHERE id=:consult_id;`,
+          {
+            replacements: {
+              consult_id,
+              date: report_date,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "visit_days":
+      db.sequelize
+        .query(
+          `SELECT DISTINCT date(created_at) as created_at FROM consultations WHERE patient_id=:pid ORDER BY created_at DESC;`,
+          {
+            replacements: {
+              pid: patient_id,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+
+    case "surgery_days":
+      db.sequelize.query(
+        `SELECT DISTINCT date(createdAt) as created_at FROM operationnotes WHERE patientId=pid ORDER BY createdAt DESC;`,
+        {
+          replacements: {
+            pid: patient_id,
+          },
+        }
+      );
+      break;
+
+    case "history":
+      db.sequelize
+        .query(
+          `SELECT a.patient_id, a.userId, a.consultation_notes, a.treatmentPlan, a.decision, a.dressing_request, a.nursing_request, a.nursing_request_status, a.facilityId, a.created_at, a.treatment_plan_status, a.treatment_by, b.surname || ' ' || b.firstname || ' ' || ifnull(b.other, '') as full_name FROM consultations a JOIN patientrecords b WHERE a.patient_id=b.id and a.facilityId=b.facilityId AND a.userId=:userId AND a.facilityId=:facilityId AND DATE(a.created_at) BETWEEN date(:dateFrom) AND date(:dateTo) ORDER BY a.created_at DESC;`,
+          {
+            replacements: {
+              userId,
+              facilityId,
+              dateFrom,
+              dateTo,
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
     default:
       break;
   }
@@ -267,7 +482,6 @@ exports.getPendingLabTxn = (req, res) => {
 exports.consultationRecord = (req, res) => {
   const today = moment().format("YYYY-MM-DD");
   const {
-    query_type = "insert",
     presenting_complaints = "",
     patientStatus = "",
     admissionStatus = "",
@@ -279,42 +493,35 @@ exports.consultationRecord = (req, res) => {
     patient_id = "",
     treatmentPlan = "",
     labInvestigations = [],
-    report_type = "",
     report_date = today,
-    dateFrom = today,
-    dateTo = today,
     patient_name = "",
     created_by = "",
   } = req.body;
   console.log(req.body);
   // console.log(req.body.labInvestigations.detail);
+
   db.sequelize
     .query(
-      `CALL consultation_record(:query_type,:presenting_complaints,:patientStatus,:dressingInfo,
-        :nursingReq,:userId,:facilityId,:consult_id,:patient_id,:treatmentPlan,:report_type,
-        :report_date, :admissionStatus,:dateFrom,:dateTo,:patient_name,:created_by)`,
-      {
-        replacements: {
-          query_type,
-          presenting_complaints,
-          patientStatus,
-          dressingInfo,
-          nursingReq,
-          userId,
-          facilityId,
-          consult_id,
-          patient_id,
-          treatmentPlan,
-          report_type,
-          report_date,
-          admissionStatus,
-          dateFrom,
-          dateTo,
-          patient_name,
-          created_by,
-        },
-      }
+      `INSERT INTO consultations (id, consultation_notes,userId, decision, dressing_request, nursing_request,facilityId,patient_id,treatmentPlan,patient_name,seen_by,created_at) 
+    VALUES ("${consult_id}", "${presenting_complaints}", "${userId}", "${patientStatus}", "${dressingInfo}", "${nursingReq}","${facilityId}","${patient_id}","${treatmentPlan}","${patient_name}","${created_by}","${report_date}");`
     )
+    .then((results) => {
+      if (admissionStatus === "pending") {
+        db.sequelize
+          .query(
+            `UPDATE patientrecords SET patientStatus='pending-admission', seen_by="${userId}", date_seen="${report_date}" WHERE id='${patient_id}' AND facilityId="${facilityId}";`
+          )
+          .then((results) => {
+            res.json({ success: true, results });
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json({ success: false, err });
+          });
+      } else {
+        res.json({ success: true, results });
+      }
+    })
     .then((results) => {
       labInvestigations &&
         labInvestigations.detail &&
@@ -402,65 +609,93 @@ function _doctorLabRequest(data, callback = (f) => f, error = (f) => f) {
     in_discount_amount = "",
     in_request_id = "",
   } = data;
-  db.sequelize
-    .query(
-      `CALL doctorLabRequest(:department,:test,:percentage,:price,:code,
-        :noOfLabels,:test_group,:print_type,:label_type,:patient_id,
-        :requested_by,:facilityId,:status,:query_type,:request_id,:description,
-        :patientStatus,:from,:to,:in_created_by,:in_receiptDateSN,:in_payment_status,
-        :in_old_price,:in_payables_head,:in_recievables_head,:in_account,:in_account_name,
-        :in_patient_name,:in_department_code,:in_unit_code,:in_unit_name,:in_unit,:in_range_from,
-        :in_range_to,:in_client_type,:in_client_account,:in_discount,:in_discount_head,
-        :in_discount_head_name,:in_approval_status,:in_discount_amount,:in_request_id)`,
-      {
-        replacements: {
-          department,
-          test,
-          percentage,
-          price,
-          code,
-          noOfLabels,
-          test_group,
-          print_type,
-          label_type,
-          patient_id,
-          requested_by,
-          facilityId,
-          status,
-          query_type,
-          request_id,
-          description,
-          patientStatus,
-          from,
-          to,
-          in_created_by,
-          in_receiptDateSN,
-          in_payment_status,
-          in_old_price,
-          in_payables_head,
-          in_recievables_head,
-          in_account,
-          in_account_name,
-          in_patient_name,
-          in_department_code,
-          in_unit_code,
-          in_unit_name,
-          in_unit,
-          in_range_from,
-          in_range_to,
-          in_client_type,
-          in_client_account,
-          in_discount,
-          in_discount_head,
-          in_discount_head_name,
-          in_approval_status,
-          in_discount_amount,
-          in_request_id,
-        },
-      }
-    )
-    .then((results) => callback(results))
-    .catch((err) => error(err));
+
+  switch (query_type) {
+    case "insert":
+      db.sequelize
+        .query(
+          `INSERT INTO lab_requisition(test,patient_id,facilityId,price,percentage,
+        department,test_group,status,created_by,receiptNo,payment_status,label_type,noOfLabels,
+        print_type,payable_head,receivable_head,account,account_name,
+        patient_name,department_code,unit_code,unit_name,unit,range_from,range_to,client_type,
+        client_account,discount,discount_head,discount_head_name,approval_status,discount_amount,request_id, patient_status, requested_by,description) 
+    VALUES ("${test}","${patient_id}","${facilityId}","${price}","${percentage}","${department}","${test_group}",
+        "${status}","${in_created_by}","${in_receiptDateSN}","${in_payment_status}",in_label_type,in_noOfLabels,
+        in_print_type,"${in_payables_head}","${in_recievables_head}","${in_account}","${in_account_name}",
+        "${in_patient_name}","${in_department_code}","${in_unit_code}","${in_unit_name}","${in_unit}","${in_range_from}", in_range_to,
+        "${in_client_type}","${in_client_account}","${in_discount}","${in_discount_head}","${in_discount_head_name}","${in_approval_status}",
+        "${in_discount_amount}",in_req_id,in_patient_status,in_requested_by,in_description);`
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+          case 'ordered_list':
+            
+          break;
+    default:
+      break;
+  }
+
+  // db.sequelize
+  //   .query(
+  //     `CALL doctorLabRequest(:department,:test,:percentage,:price,:code,
+  //       :noOfLabels,:test_group,:print_type,:label_type,:patient_id,
+  //       :requested_by,:facilityId,:status,:query_type,:request_id,:description,
+  //       :patientStatus,:from,:to,:in_created_by,:in_receiptDateSN,:in_payment_status,
+  //       :in_old_price,:in_payables_head,:in_recievables_head,:in_account,:in_account_name,
+  //       :in_patient_name,:in_department_code,:in_unit_code,:in_unit_name,:in_unit,:in_range_from,
+  //       :in_range_to,:in_client_type,:in_client_account,:in_discount,:in_discount_head,
+  //       :in_discount_head_name,:in_approval_status,:in_discount_amount,:in_request_id)`,
+  //     {
+  //       replacements: {
+  //         department,
+  //         test,
+  //         percentage,
+  //         price,
+  //         code,
+  //         noOfLabels,
+  //         test_group,
+  //         print_type,
+  //         label_type,
+  //         patient_id,
+  //         requested_by,
+  //         facilityId,
+  //         status,
+  //         query_type,
+  //         request_id,
+  //         description,
+  //         patientStatus,
+  //         from,
+  //         to,
+  //         in_created_by,
+  //         in_receiptDateSN,
+  //         in_payment_status,
+  //         in_old_price,
+  //         in_payables_head,
+  //         in_recievables_head,
+  //         in_account,
+  //         in_account_name,
+  //         in_patient_name,
+  //         in_department_code,
+  //         in_unit_code,
+  //         in_unit_name,
+  //         in_unit,
+  //         in_range_from,
+  //         in_range_to,
+  //         in_client_type,
+  //         in_client_account,
+  //         in_discount,
+  //         in_discount_head,
+  //         in_discount_head_name,
+  //         in_approval_status,
+  //         in_discount_amount,
+  //         in_request_id,
+  //       },
+  //     }
+  //   )
+
+  // .then((results) => callback(results))
+  // .catch((err) => error(err));
 }
 
 exports.doctorLabRequest = _doctorLabRequest;

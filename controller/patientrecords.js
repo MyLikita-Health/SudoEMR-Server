@@ -82,10 +82,9 @@ exports.getPatientInfo = (req, res) => {
 
   db.sequelize
     .query(
-      // 'CALL '
-      `SELECT a.id AS id, concat(a.firstname, ' ', a.surname) as name, a.dob, a.Gender as gender, 
+      `SELECT a.id AS id, a.firstname || ' ' || a.surname as name, a.dob, a.Gender as gender, 
         ifnull(a.phoneNo,'') as phone, a.email, b.accountNo,b.accountType
-        FROM patientrecords  JOIN patientfileno b ON a.accountNo = b.accountNo
+        FROM patientrecords a JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
     .then((results) => res.json({ success: true, results: results[0] }))

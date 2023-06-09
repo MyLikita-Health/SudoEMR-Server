@@ -7,7 +7,7 @@ module.exports = app => {
 
   app.post('/diagnosis/new', diagnosis.newDiagnosis);
   app.post('/consultation/new', diagnosis.consultationRecord);
-  app.get('/consultation/query', diagnosis.getConsultation);
+  app.get('/consultation/query', diagnosis._consultationRecord);
   app.get('/diagnosis/all/:patientId/:facilityId', diagnosis.getDiagnosisByPatientID)
   app.post('/diagnosis/inventory/new', diagnosis.saveNewInventory);
   app.get('/diagnosis/inventory/list/:facilityId', diagnosis.getLabInventoryAll);
