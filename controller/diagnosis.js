@@ -564,6 +564,8 @@ exports.consultationRecord = (req, res) => {
     });
 };
 
+
+
 function _doctorLabRequest(data, callback = (f) => f, error = (f) => f) {
   const {
     department = "",
@@ -620,18 +622,34 @@ function _doctorLabRequest(data, callback = (f) => f, error = (f) => f) {
         patient_name,department_code,unit_code,unit_name,unit,range_from,range_to,client_type,
         client_account,discount,discount_head,discount_head_name,approval_status,discount_amount,request_id, patient_status, requested_by,description) 
     VALUES ("${test}","${patient_id}","${facilityId}","${price}","${percentage}","${department}","${test_group}",
-        "${status}","${in_created_by}","${in_receiptDateSN}","${in_payment_status}",in_label_type,in_noOfLabels,
+        "${status}","${in_created_by}","${in_receiptDateSN}","${in_payment_status}","${label_type}","${noOfLabels}",
         in_print_type,"${in_payables_head}","${in_recievables_head}","${in_account}","${in_account_name}",
-        "${in_patient_name}","${in_department_code}","${in_unit_code}","${in_unit_name}","${in_unit}","${in_range_from}", in_range_to,
+        "${in_patient_name}","${in_department_code}","${in_unit_code}","${in_unit_name}","${in_unit}","${in_range_from}", "${in_range_to}",
         "${in_client_type}","${in_client_account}","${in_discount}","${in_discount_head}","${in_discount_head_name}","${in_approval_status}",
-        "${in_discount_amount}",in_req_id,in_patient_status,in_requested_by,in_description);`
+        "${in_discount_amount}","${request_id}","${unit}","${requested_by}","${in_unit_name}");`
         )
         .then((results) => callback(results))
         .catch((err) => error(err));
       break;
-          case 'ordered_list':
-            
-          break;
+    case "ordered_list":
+      db.sequelize
+        .query(
+          `SELECT patient_name as name, created_at, patient_id,'' as DOB,request_id, patient_status FROM lab_requisition 
+            WHERE status='ordered' AND date(created_at) BETWEEN date(:in_range_from) AND date(:in_range_to) GROUP BY patient_id;
+            `,
+            {
+              replacements:{
+                in_range_to,
+                in_range_from
+              }
+            }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+      case "lab_processed":
+
+      break;
     default:
       break;
   }
@@ -697,6 +715,8 @@ function _doctorLabRequest(data, callback = (f) => f, error = (f) => f) {
   // .then((results) => callback(results))
   // .catch((err) => error(err));
 }
+
+
 
 exports.doctorLabRequest = _doctorLabRequest;
 
