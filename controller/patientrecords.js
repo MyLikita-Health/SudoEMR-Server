@@ -1,6 +1,8 @@
 const { Op } = require("sequelize");
 const db = require("../models");
 const PatientRecords = db.patientrecords;
+const SurgicalNoteTemp = db.surgical_note_temp;
+const SurgicalNote = db.surgical_note;
 const moment = require("moment");
 // const queryOperationNotes = require('./operationnotes').queryOperationNotes
 
@@ -129,9 +131,14 @@ exports.getUnassignedPatients = (req, res) => {
 exports.patientClarking = (req, res) => {
   const { facilityId } = req.params;
   db.sequelize
-    .query('select * from patientrecords where id=1 and facilityId="' + facilityId + '"', {
-      type: db.sequelize.QueryTypes.SELECT,
-    })
+    .query(
+      'select * from patientrecords where id=1 and facilityId="' +
+        facilityId +
+        '"',
+      {
+        type: db.sequelize.QueryTypes.SELECT,
+      }
+    )
     .then((results) => res.json({ results }))
     .catch((err) => res.status(500).json({ err }));
 };
@@ -765,31 +772,65 @@ exports.surgicalNote = (req, res) => {
   } = req.body;
   const { query_type = "", facilityId = "" } = req.query;
 
-  
-
-  db.sequelize
-    .query(
-      "call surgical_note(:template,:patient_name, :relative, :agreed, :witness_by, :patient_id, :created_at, :created_by,:facilityId,:query_type)",
-      {
-        replacements: {
-          template,
-          patient_name,
-          relative,
-          agreed,
-          witness_by,
-          patient_id,
-          created_at,
-          created_by,
-          facilityId,
-          query_type,
-        },
-      }
-    )
-    .then((results) => res.json({ results }))
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ err });
-    });
+  switch (query_type) {
+    case "insert":
+      SurgicalNoteTemp.create({ template, facilityId, created_by })
+        .then((results) => res.json({ results: results[0] }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ err });
+        });
+      break;
+    case "select":
+      db.sequelize
+        .query(
+          "SELECT template FROM surgical_note_temp WHERE facilityId=:facilityId ORDER BY id DESC LIMIT 1;",
+          {
+            replacements: {
+              facilityId,
+            },
+          }
+        )
+        .then((results) => res.json({ results: results[0] }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ err });
+        });
+      break;
+    case "insert_surgical_note":
+      SurgicalNote.create({
+        patient_name,
+        relative,
+        agreed,
+        witness_by,
+        patient_id,
+      })
+        .then((results) => res.json({ results: results[0] }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ err });
+        });
+      break;
+    case "select_surgical_note":
+      db.sequelize
+        .query(
+          `SELECT * FROM surgical_note WHERE patient_id=:patient_id AND facilityId=:facilityId;`,
+          {
+            replacements: {
+              facilityId,
+              patient_id,
+            },
+          }
+        )
+        .then((results) => res.json({ results: results[0] }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ err });
+        });
+      break;
+    default:
+      break;
+  }
 };
 
 //android-studio/bin$ sudo ./studio.sh
