@@ -38,7 +38,8 @@ module.exports = function(sequelize, DataTypes) {
     created_by: {
       type: DataTypes.STRING(50),
       allowNull: true
-    }
+    },
+    
   }, {
     sequelize,
     tableName: 'fluid_chart',

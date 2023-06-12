@@ -3,6 +3,7 @@ const db = require("../models");
 const moment = require("moment");
 const HourList = db.hour_list;
 const DrugFrequency = db.drug_frequency;
+const FluidChart = db.fluid_chart;
 exports.addDrug = (req, res) => {
   const { facilityId } = req.body;
   const stmt =
@@ -1386,8 +1387,9 @@ exports.deleteDrugFreqSetup = (req, res) => {
   })
     .then((results) => res.json({ success: true, results }))
     .catch((err) => {
-      console.log(err)
-      res.json({ success: false, err })});
+      console.log(err);
+      res.json({ success: false, err });
+    });
 };
 
 exports.newDrugFreqSetup = (req, res) => {
@@ -1425,30 +1427,37 @@ exports.fluidChart = (req, res) => {
     output_volume = null,
     output_route = null,
     output_type = null,
-    created_at = null,
     created_by = null,
   } = req.body;
   const { query_type } = req.query;
-  db.sequelize
-    .query(
-      "CALL fluid_chart(:patient_id, :input_volume, :input_route, :input_type, :output_volume, :output_route, :output_type, :created_at,:query_type,:created_by)",
-      {
-        replacements: {
-          patient_id,
-          input_volume,
-          input_route,
-          input_type,
-          output_volume,
-          output_route,
-          output_type,
-          created_at,
-          query_type,
-          created_by,
-        },
-      }
-    )
-    .then((results) => res.json({ success: true, results }))
-    .catch((err) => res.json({ success: false, err }));
+
+  switch (query_type) {
+    case "insert":
+      FluidChart.create({
+        patient_id,
+        input_volume,
+        input_route,
+        input_type,
+        output_volume,
+        output_route,
+        output_type,
+        created_by,
+      })
+        .then((results) => res.json({ success: true, results: results }))
+        .catch((err) => res.json({ success: false, err }));
+      break;
+    case "select":
+      FluidChart.findAll({
+        where: { patient_id },
+      })
+        .then((results) => {
+          res.json({ success: true, results })
+        })
+        .catch((err) => res.json({ success: false, err }));
+      break;
+    default:
+      break;
+  }
 };
 
 exports.nurseryNote = (req, res) => {

@@ -1,5 +1,6 @@
 const moment = require("moment");
 const db = require("../models");
+const MedicalReport = db.medical_report
 
 exports.addPatient = (req, res) => {};
 
@@ -184,6 +185,9 @@ exports.medical_report = (req, res) => {
     other_info,
     facilityId,
   } = req.body;
+
+  MedicalReport.create({})
+
   db.sequelize
     .query(
       "CALL medical_report(:user_id,:admit_date,:proceduce_date,:discharge_date,:special_instrustion,:other_info,:facilityId)",

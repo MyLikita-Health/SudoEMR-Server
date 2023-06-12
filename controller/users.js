@@ -368,10 +368,12 @@ exports.delete = (req, res) => {
 
 exports.getRoles = (req, res) => {
   const { facilityId } = req.params;
-  db.sequelize
-    .query("call get_roles(:facilityId)", {
-      replacements: { facilityId },
-    })
+  User.findAll({
+    attributes: [[db.sequelize.literal("DISTINCT role"), "role"]],
+    where: {
+      facilityId: facilityId,
+    },
+  })
     .then((results) => {
       const arr = [];
       results.forEach((i) => arr.push(i.role));
@@ -385,35 +387,37 @@ exports.getDoctors = (req, res) => {
   const { query_type = "" } = req.query;
   switch (query_type) {
     case "specialist":
-      db.sequelize.query(
-        `SELECT * FROM users WHERE role = 'doctor' AND speciality != 'General' AND facilityId=:facId ;`,
-        {
-          replacements: {
-            facId: facilityId,
-          },
-        }
-      )
+      db.sequelize
+        .query(
+          `SELECT * FROM users WHERE role = 'doctor' AND speciality != 'General' AND facilityId=:facId ;`,
+          {
+            replacements: {
+              facId: facilityId,
+            },
+          }
+        )
         .then((results) => {
-          console.log(results)
-          res.status(200).json({ results:results[0],success:true });
+          console.log(results);
+          res.status(200).json({ results: results[0], success: true });
         })
-        .catch((err) => res.status(500).json({ err,success:false }));
+        .catch((err) => res.status(500).json({ err, success: false }));
       break;
 
     default:
-      db.sequelize.query(
-        `SELECT * FROM users WHERE role = 'doctor' AND facilityId=:facId `,
-        {
-          replacements: {
-            facId: facilityId,
-          },
-        }
-      )
+      db.sequelize
+        .query(
+          `SELECT * FROM users WHERE role = 'doctor' AND facilityId=:facId `,
+          {
+            replacements: {
+              facId: facilityId,
+            },
+          }
+        )
         .then((results) => {
-          res.status(200).json({ results:results[0],success:true });
-          console.log(results)
+          res.status(200).json({ results: results[0], success: true });
+          console.log(results);
         })
-        .catch((err) => res.status(500).json({ err,success:false }));
+        .catch((err) => res.status(500).json({ err, success: false }));
       break;
   }
 };

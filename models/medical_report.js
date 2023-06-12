@@ -7,9 +7,27 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    hour: {
+    user_id: {
       type: DataTypes.STRING(5),
       allowNull: false
+    },
+    admit_date:{
+
+    },
+    proceduce_date:{
+
+    },
+    discharge_date:{
+
+    },
+    special_instruction:{
+
+    },
+    other_info:{
+
+    },
+    facilityId:{
+      
     }
   }, {
     sequelize,

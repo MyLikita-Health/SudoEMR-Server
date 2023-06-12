@@ -575,7 +575,7 @@ exports.getDrugSchedule = (req, res) => {
         .then((results) => {
           res.json({
             success: true,
-            results,
+            results:results[0],
           });
         })
         .catch((err) => {
@@ -600,7 +600,7 @@ exports.getDrugSchedule = (req, res) => {
           .then((results) => {
             res.json({
               success: true,
-              results,
+              results:results[0],
             });
           })
           .catch((err) => {
@@ -620,7 +620,7 @@ exports.getDrugSchedule = (req, res) => {
           .then((results) => {
             res.json({
               success: true,
-              results,
+              results:results[0],
             });
           })
           .catch((err) => {

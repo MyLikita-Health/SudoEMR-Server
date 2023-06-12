@@ -340,7 +340,7 @@ exports._consultationRecord = (req, res) => {
 
     case "surgery_days":
       db.sequelize.query(
-        `SELECT DISTINCT date(createdAt) as created_at FROM operationnotes WHERE patientId=pid ORDER BY createdAt DESC;`,
+        `SELECT DISTINCT date(createdAt) as created_at FROM operationnotes WHERE patientId=:pid ORDER BY createdAt DESC;`,
         {
           replacements: {
             pid: patient_id,
