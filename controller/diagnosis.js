@@ -250,6 +250,7 @@ exports._consultationRecord = (req, res) => {
           {
             replacements: {
               facilityId,
+              pid:patient_id
             },
           }
         )
@@ -264,10 +265,11 @@ exports._consultationRecord = (req, res) => {
     case "treatment_plan_by_patient":
       db.sequelize
         .query(
-          `SELECT a.id, a.created_at, treatmentPlan, b.firstname ||' '|| b.lastname as doctor_name FROM consultations a JOIN users b ON a.userId = b.username WHERE a.facilityId=b.facilityId AND patient_id=in_pid AND treatment_plan_status='pending' AND  a.facilityId=:facilityId AND treatmentPlan!='' ORDER BY a.created_at DESC;`,
+          `SELECT a.id, a.created_at, treatmentPlan, b.firstname ||' '|| b.lastname as doctor_name FROM consultations a JOIN users b ON a.userId = b.username WHERE a.facilityId=b.facilityId AND patient_id=:pid AND treatment_plan_status='pending' AND  a.facilityId=:facilityId AND treatmentPlan!='' ORDER BY a.created_at DESC;`,
           {
             replacements: {
               facilityId,
+              pid:patient_id
             },
           }
         )

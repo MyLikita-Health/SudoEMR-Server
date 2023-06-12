@@ -266,16 +266,106 @@ function getPatientDrugs(
   callback = (f) => f,
   error = (f) => f
 ) {
-  db.sequelize
-    .query("CALL get_prescribed_drugs(:query_type, :patient_id, :facilityId)", {
-      replacements: {
-        query_type,
-        patient_id,
-        facilityId,
-      },
-    })
-    .then((results) => callback(results))
-    .catch((err) => error(err));
+  switch (query_type) {
+    case "pending":
+      db.sequelize
+        .query(
+          `SELECT route,drug,dosage,patient_id,id as prescription_id, created_at,duration,period,frequency, startTime,times_per_day,end_date FROM dispensary WHERE patient_id=:patient_id AND schedule_status='pending' AND decision='admit' AND facilityId = :facilityId;`,
+          {
+            replacements: {
+              patient_id,
+              facilityId,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+    case "current":
+      db.sequelize
+        .query(
+          `SELECT created_at, route || ' '|| drug ||' ' || dosage || ' ' || frequency || ' for '|| duration || ' ' || period as medication, duration, period, id, created_at FROM dispensary WHERE id in (SELECT prescription_id FROM drug_schedule WHERE status = 'scheduled') AND patient_id=:patient_id AND facilityId = :facilityId;`,
+          {
+            replacements: {
+              patient_id,
+              facilityId,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+    case "by_req_id":
+      db.sequelize
+        .query(
+          `SELECT drug,dosage,patient_id,id, created_at,duration,period,frequency, route FROM dispensary WHERE request_id=:patient_id AND facilityId = :facilityId;`,
+          {
+            replacements: {
+              patient_id,
+              facilityId,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+
+    case "out-patient":
+      db.sequelize
+        .query(
+          `SELECT request_id, route,drug,dosage,patient_id,id as prescription_id, created_at,duration,period,frequency, startTime FROM dispensary WHERE patient_id=:patient_id AND schedule_status='pending' AND decision='out-patient' AND facilityId = :facilityId;`,
+          {
+            replacements: {
+              patient_id,
+              facilityId,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+    case "out-patient-list":
+      db.sequelize
+        .query(
+          `SELECT b.firstname || ' ' || b.surname || '(' || b.id ||')'  as patient_info, route,drug,dosage,a.patient_id,a.id as prescription_id,request_id, created_at,duration,period,frequency, startTime FROM dispensary a JOIN patientrecords b ON a.patient_id = b.id WHERE schedule_status='pending' AND date(a.end_date) >= date('now') AND decision='out-patien' AND a.facilityId = :facilityId;`,
+          {
+            replacements: {
+              facilityId,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+    case "med-report":
+      db.sequelize
+        .query(
+          `SELECT * FROM medication_report WHERE patient_id=:patient_id ORDER BY time_stamp DESC;`,
+          {
+            replacements: {
+              patient_id,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+    case "close outpatient prescription":
+      db.sequelize
+        .query(
+          `UPDATE dispensary SET schedule_status='ended' WHERE request_id=:patient_id AND facilityId=:facilityId;`,
+          {
+            replacements: {
+              facilityId,
+            },
+          }
+        )
+        .then((results) => callback(results))
+        .catch((err) => error(err));
+      break;
+    default:
+      break;
+  }
 }
 
 exports.postPrescribedDrugs = (req, res) => {
@@ -284,7 +374,7 @@ exports.postPrescribedDrugs = (req, res) => {
     (results) => {
       res.json({
         success: true,
-        results,
+        results:results[0],
       });
     },
     (err) => {
@@ -302,7 +392,7 @@ exports.getPatientPrescribedDrugs = (req, res) => {
     (results) => {
       res.json({
         success: true,
-        results,
+        results:results[0],
       });
     },
     (err) => {
@@ -495,17 +585,18 @@ exports.getDrugSchedule = (req, res) => {
       break;
     case "by_date":
       if (patient_id === "all") {
-        db.sequelize.query(
-          `SELECT a.id, b.patient_name as name, a.patient_id, b.name as bed_name, b.class_type, a.drug as drug_name, a.dosage, a.route, time_stamp, a.status, administered_by, a.facilityId, a.frequency FROM drug_schedule_view a JOIN in_patient_list b ON a.patient_id = b.patient_id where a.status != 'stop' AND date(time_stamp) = :date AND a.facilityId=:facilityId ORDER BY time_stamp ASC, id;`,
-          {
-            replacements: {
-              patient_id,
-              facilityId,
-              date
-            },
-            type: db.sequelize.QueryTypes.SELECT,
-          }
-        )
+        db.sequelize
+          .query(
+            `SELECT a.id, b.patient_name as name, a.patient_id, b.name as bed_name, b.class_type, a.drug as drug_name, a.dosage, a.route, time_stamp, a.status, administered_by, a.facilityId, a.frequency FROM drug_schedule_view a JOIN in_patient_list b ON a.patient_id = b.patient_id where a.status != 'stop' AND date(time_stamp) = :date AND a.facilityId=:facilityId ORDER BY time_stamp ASC, id;`,
+            {
+              replacements: {
+                patient_id,
+                facilityId,
+                date,
+              },
+              type: db.sequelize.QueryTypes.SELECT,
+            }
+          )
           .then((results) => {
             res.json({
               success: true,
@@ -517,20 +608,25 @@ exports.getDrugSchedule = (req, res) => {
             res.status(500).json({ success: false, err });
           });
       } else {
-        db.sequelize.query(`SELECT * FROM drug_schedule where patient_id = :patient_id AND status != 'stop' AND date(time_stamp) = in_date ORDER BY time_stamp ASC,id;`,{
-          replacements:{
-            patient_id
-          }
-        }).then((results) => {
-          res.json({
-            success: true,
-            results,
+        db.sequelize
+          .query(
+            `SELECT * FROM drug_schedule where patient_id = :patient_id AND status != 'stop' AND date(time_stamp) = in_date ORDER BY time_stamp ASC,id;`,
+            {
+              replacements: {
+                patient_id,
+              },
+            }
+          )
+          .then((results) => {
+            res.json({
+              success: true,
+              results,
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).json({ success: false, err });
           });
-        })
-        .catch((err) => {
-          console.log(err);
-          res.status(500).json({ success: false, err });
-        });
       }
       break;
     default:

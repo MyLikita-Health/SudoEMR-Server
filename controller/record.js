@@ -3,6 +3,8 @@ const moment = require("moment");
 const PatientRecords = db.patientrecords;
 const PatientFileNo = db.patientfileno;
 const BedList = db.bedlist;
+const NursingNote = db.nursing_note;
+const NursingReport = db.nursing_report;
 const { Op } = require("sequelize");
 
 exports.saveRecordInfo = (req, res) => {
@@ -546,42 +548,56 @@ exports.newNursingReport = (req, res) => {
     created_at,
     id = 0,
   } = req.body;
+  switch (query_type) {
+    case "new":
+      NursingReport.create({
+        created_by: userId,
+        report,
+        facilityId,
+        created_at: moment(created_at).format("YYYY-MM-DD hh:mm:ss"),
+      })
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "update":
+      NursingReport.update(
+        {
+          report,
+        },
+        { where: { id, created_by: userId, facilityId } }
+      )
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    default:
+      break;
+  }
+};
+
+exports.getNursingReports = (req, res) => {
+  const { facilityId = "" } = req.query;
 
   db.sequelize
     .query(
-      "CALL new_nursing_report(:query_type,:facilityId,:userId,:report,:created_at,:id)",
+      "SELECT * FROM nursing_report where facilityId=:facilityId ORDER BY created_at DESC;",
       {
         replacements: {
-          query_type,
           facilityId,
-          userId,
-          report,
-          created_at: moment(created_at).format("YYYY-MM-DD hh:mm:ss"),
-          id,
         },
       }
     )
     .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false, err });
-    });
-};
-
-exports.getNursingReports = (req, res) => {
-  const { query_type = "", facilityId = "" } = req.query;
-
-  db.sequelize
-    .query("CALL get_nursing_reports(:query_type,:facilityId)", {
-      replacements: {
-        query_type,
-        facilityId,
-      },
-    })
-    .then((results) => {
-      res.json({ success: true, results });
+      res.json({ success: true, results: results[0] });
     })
     .catch((err) => {
       res.json({ success: false, err });
@@ -597,27 +613,41 @@ exports.patient_nursing_notes = (req, res) => {
     created_by = "",
   } = req.body;
   const { query_type = "" } = req.query;
-  db.sequelize
-    .query(
-      "CALL patient_nursing_notes(:report, :patient_id, :created_at, :created_by,:facilityId,:query_type)",
-      {
-        replacements: {
-          query_type,
-          facilityId,
+
+  switch (query_type) {
+    case "insert":
+      NursingNote.create({
+        report,
+        patient_id,
+        created_by,
+        facilityId,
+      })
+        .then((results) => {
+          res.json({ success: true, results });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    case "select":
+      NursingNote.findAll({
+        where: {
           patient_id,
-          report,
-          created_by,
-          created_at: moment(created_at).format("YYYY-MM-DD hh:mm:ss"),
+          facilityId,
         },
-      }
-    )
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false, err });
-    });
+      })
+        .then((results) => {
+          res.json({ success: true, results: results[0] });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ success: false, err });
+        });
+      break;
+    default:
+      break;
+  }
 };
 
 const queryDicomRepo = (

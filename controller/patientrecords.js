@@ -99,7 +99,7 @@ exports.getPatientFullInfo = (req, res) => {
 
   db.sequelize
     .query(
-      `SELECT a.id AS id, a.id as patientHospitalId, concat(a.surname, ' ', a.firstname) as name, a.surname, a.firstname,
+      `SELECT a.id AS id, a.id as patientHospitalId, a.surname || ' ' || a.firstname as name, a.surname, a.firstname,
         a.DOB as dob, a.Gender as gender, 
         ifnull(a.phoneNo,'') as phone, a.email, b.accountNo, b.accountNo as clientAccount,
         b.accountType, a.maritalstatus, 
@@ -764,6 +764,9 @@ exports.surgicalNote = (req, res) => {
     created_by = "",
   } = req.body;
   const { query_type = "", facilityId = "" } = req.query;
+
+  
+
   db.sequelize
     .query(
       "call surgical_note(:template,:patient_name, :relative, :agreed, :witness_by, :patient_id, :created_at, :created_by,:facilityId,:query_type)",
