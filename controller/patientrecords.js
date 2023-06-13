@@ -89,7 +89,9 @@ exports.getPatientInfo = (req, res) => {
         FROM patientrecords a JOIN patientfileno b ON a.accountNo = b.accountNo
         WHERE a.id = "${patientId}" AND a.facilityId="${facilityId}"`
     )
-    .then((results) => res.json({ success: true, results: results[0] }))
+    .then((results) => {
+      res.json({ success: true, results: results[0] });
+    })
     .catch((err) => {
       res.status(500).json({ err });
       console.log(err);
@@ -807,7 +809,7 @@ exports.surgicalNote = (req, res) => {
         witness_by,
         patient_id,
         facilityId,
-        created_by
+        created_by,
       })
         .then((results) => res.json({ results: results[0] }))
         .catch((err) => {

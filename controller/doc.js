@@ -1,6 +1,6 @@
 const moment = require("moment");
 const db = require("../models");
-const MedicalReport = db.medical_report
+const MedicalReport = db.medical_report;
 
 exports.addPatient = (req, res) => {};
 
@@ -109,7 +109,7 @@ exports.appointment = (req, res) => {
           }
         )
         .then((results) => {
-          res.json({ success: true, results });
+          res.json({ success: true, results:results[0] });
         })
         .catch((err) => {
           res.status(500).json({ success: false, err });
@@ -128,7 +128,7 @@ exports.appointment = (req, res) => {
           }
         )
         .then((results) => {
-          res.json({ success: true, results });
+          res.json({ success: true, results:results[0] });
         })
         .catch((err) => {
           res.status(500).json({ success: false, err });
@@ -147,7 +147,7 @@ exports.appointment = (req, res) => {
           }
         )
         .then((results) => {
-          res.json({ success: true, results });
+          res.json({ success: true, results:results[0] });
         })
         .catch((err) => {
           res.status(500).json({ success: false, err });
@@ -185,29 +185,21 @@ exports.medical_report = (req, res) => {
     other_info,
     facilityId,
   } = req.body;
-
-  MedicalReport.create({})
-
-  db.sequelize
-    .query(
-      "CALL medical_report(:user_id,:admit_date,:proceduce_date,:discharge_date,:special_instrustion,:other_info,:facilityId)",
-      {
-        replacements: {
-          user_id,
-          admit_date,
-          proceduce_date,
-          discharge_date,
-          special_instrustion,
-          other_info,
-          facilityId,
-        },
-      }
-    )
+console.log('herererreerer')
+  MedicalReport.create({
+    user_id,
+    admit_date,
+    proceduce_date,
+    discharge_date,
+    special_instruction: special_instrustion,
+    other_info,
+    facilityId,
+  })
     .then((results) => {
       res.json({ success: true, results });
     })
     .catch((err) => {
-      res.status(500).json({ success: false, err });
       console.log(err);
+      res.status(500).json({ success: false, err });
     });
 };
