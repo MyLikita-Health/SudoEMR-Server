@@ -1,7 +1,9 @@
 const { v4 } = require("uuid");
 const db = require("../models");
 const moment = require("moment");
+const { Op } = require("sequelize");
 const HourList = db.hour_list;
+const DrugList = db.druglist;
 const DrugFrequency = db.drug_frequency;
 const FluidChart = db.fluid_chart;
 exports.addDrug = (req, res) => {
@@ -112,21 +114,14 @@ exports.createDrug = (req, res) => {
     formulation = "",
     facilityId = "",
   } = req.body;
-  let id = v4();
-  let date = moment().format("YYYY-MM-DD hh:mm:ss");
-  db.sequelize
-    .query(
-      "CALL pharm_create_drug(:drug_name,:generic_name,:formulation,:id,:facilityId)",
-      {
-        replacements: {
-          drug_name,
-          generic_name,
-          formulation,
-          id,
-          facilityId,
-        },
-      }
-    )
+
+  DrugList.create({
+    name: drug_name,
+    generic_name,
+    formulation,
+    facilityId,
+  })
+
     .then(() => {
       res.json({
         success: true,
@@ -201,10 +196,12 @@ exports.updateDrug = (req, res) => {
 exports.deleteDrug = (req, res) => {
   console.log(req.body);
   const { id = "", facilityId = "" } = req.body;
-  db.sequelize
-    .query("call delete_drug(:id,:facilityId)", {
-      replacements: { id, facilityId },
-    })
+  DrugList.destroy({
+    where: {
+      id,
+      facilityId,
+    },
+  })
     .then((results) => res.json({ success: true, results }))
     .catch((err) => {
       console.log(err);
@@ -542,41 +539,85 @@ exports.getFactoryDrugQtty = (req, res) => {
 exports.getTotalDrugList = (req, res) => {
   const { facilityId, filterText } = req.query;
   console.log(req.query);
-  db.sequelize
-    .query("call get_druglist_count(:filterText,:facilityId)", {
-      replacements: { facilityId, filterText: `%${filterText}%` },
-    })
-    .then((results) =>
+  DrugList.count({
+    where: {
+      facilityId: facilityId,
+      [Op.or]: [
+        { name: { [Op.like]: `%${filterText}%` } },
+        { formulation: { [Op.like]: `%${filterText}%` } },
+        { generic_name: { [Op.like]: `%${filterText}%` } },
+      ],
+    },
+  })
+    .then((results) => {
+      console.log(results);
       res.json({
-        results,
+        results: results,
         success: true,
-      })
-    )
+      });
+    })
     .catch((err) => res.status(500).json({ err }));
 };
 
 exports.getDrugSearch = (req, res) => {
   const { facilityId, searchValue, from, to, query = "" } = req.query;
-  db.sequelize
-    .query("call get_drug_search(:searchValue,:facilityId,:from,:to,:query)", {
-      replacements: {
-        facilityId,
-        searchValue: `%${searchValue}%`,
-        from: parseInt(from),
-        to: parseInt(to),
-        query,
-      },
-    })
-    .then((results) => res.status(200).json({ results, success: true }))
-    .catch((err) => res.status(500).json({ err }));
+  switch (query) {
+    case "default":
+      PharmStore.findAll({
+        where: {
+          balance: { [Op.gt]: 0 },
+          [Op.or]: [
+            { drug_name: { [Op.like]: `%${searchValue}%` } },
+            { drug_category: { [Op.like]: `%${searchValue}%` } },
+            { uom: { [Op.like]: `%${searchValue}%` } },
+            { generic_name: { [Op.like]: `%${searchValue}%` } },
+            { barcode: { [Op.like]: `%${searchValue}%` } },
+          ],
+          [Op.or]: [
+            { expiry_date: { [Op.gt]: Sequelize.literal('datetime("now")') } },
+            { expiry_date: "1111-11-11" },
+          ],
+          facilityId: facilityId,
+        },
+        limit: [from, to],
+      })
+        .then((results) =>
+          res.status(200).json({ results: results, success: true })
+        )
+        .catch((err) => res.status(500).json({ err }));
+      break;
+    case "drug_list":
+      DrugList.findAll({
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: `%${searchValue}%` } },
+            { formulation: { [Op.like]: `%${searchValue}%` } },
+            { generic_name: { [Op.like]: `%${searchValue}%` } },
+          ],
+          facilityId: facilityId,
+        },
+        limit: [from, to],
+      })
+        .then((results) => {
+          console.log(results);
+          res.status(200).json({ results: results, success: true });
+        })
+        .catch((err) => res.status(500).json({ err }));
+      break;
+    default:
+      break;
+  }
 };
 
 exports.getDrugList = (req, res) => {
   const { facilityId, from, to } = req.query;
-  db.sequelize
-    .query("call get_druglist(:facilityId)", {
-      replacements: { facilityId },
-    })
+  DrugList.findAll({
+    where: {
+      facilityId: facilityId,
+    },
+    order: [["createdAt", "DESC"]],
+    limit: 100,
+  })
     .then((results) => res.status(200).json({ results, success: true }))
     .catch((err) => {
       console.log(err);
@@ -1451,7 +1492,7 @@ exports.fluidChart = (req, res) => {
         where: { patient_id },
       })
         .then((results) => {
-          res.json({ success: true, results })
+          res.json({ success: true, results });
         })
         .catch((err) => res.json({ success: false, err }));
       break;
