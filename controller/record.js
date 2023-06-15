@@ -5,6 +5,7 @@ const PatientFileNo = db.patientfileno;
 const BedList = db.bedlist;
 const NursingNote = db.nursing_note;
 const NursingReport = db.nursing_report;
+const PreviousDoc = db.previous_doc;
 const { Op } = require("sequelize");
 
 exports.saveRecordInfo = (req, res) => {
@@ -305,7 +306,7 @@ exports.bedAllocation = (req, res) => {
 };
 
 exports.getInPatients = (req, res) => {
-  const { query_type = "", facilityId = "", condition = "" } = req.query;
+  const { query_type = "", facilityId = "", condition = "" } = req.params;
   switch (query_type) {
     case "in_patients":
       db.sequelize
@@ -735,28 +736,17 @@ exports.getDicomFilesForPatient = (req, res) => {
 exports.uploadFiles = (req, res) => {
   const files = req.files;
   const { patient_id, file_type, file_date } = req.body;
-  // console.log(files, "ddsafas;dfk;", patient_id);
-
   files.forEach((item) => {
-    db.sequelize
-      .query(
-        `INSERT INTO previous_doc(patient_id,file_type,file_url,file_date) 
-        VALUES("${patient_id}","${file_type}","${item.filename}","${file_date}")`
-      )
-      .catch((err) => {
-        console.log(err);
-        res.status(500).json({ success: false, err });
-      });
+    PreviousDoc.create({
+      patient_id,
+      file_type,
+      file_url: item.filename,
+      file_date,
+    }).catch((err) => {
+      console.log(err);
+      res.status(500).json({ success: false, err });
+    });
   });
-
-  // .catch((err) => {
-  //   res.json({
-  //     success: false,
-  //     err,
-  //     message: "Error occur before submitting",
-  //   });
-  // });
-
   res.json({ success: true, message: "File Upload successfully" });
 };
 

@@ -30,26 +30,54 @@ exports.getConsultation = (req, res) => {
     query_type = "select_all",
     facilityId,
   } = req.query;
-  db.sequelize
-    .query(
-      "CALL get_all_consultation(:date_from,:date_to,:userId,:query_type,:facilityId)",
-      {
-        replacements: {
-          date_from,
-          date_to,
-          userId,
-          query_type,
-          facilityId,
-        },
-      }
-    )
-    .then((results) => {
-      res.json({ success: true, results });
-    })
-    .catch((err) => {
-      res.status(500).json({ success: false, err });
-      console.log(err);
-    });
+
+  switch (query_type) {
+    case "select_all":
+      db.sequelize
+        .query(
+          "SELECT * from consultations WHERE facilityId=:facilityId AND DATE(created_at) BETWEEN DATE(:date_from) AND DATE(:date_to);",
+          {
+            replacements: {
+              date_from,
+              date_to,
+              facilityId
+            },
+          }
+        )
+        .then((results) => {
+          res.json({ success: true, results:results[0] });
+          console.log(results)
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    case "select_by_doc":
+      db.sequelize
+        .query(
+          "SELECT * from consultations WHERE userId=:userId AND facilityId=:facilityId AND DATE(created_at) BETWEEN DATE(:date_from) AND DATE(:date_to);",
+          {
+            replacements: {
+              date_from,
+              date_to,
+              userId,
+              facilityId
+            },
+          }
+        )
+        .then((results) => {
+          console.log(results)
+          res.json({ success: true, results:results[0] });
+        })
+        .catch((err) => {
+          res.status(500).json({ success: false, err });
+          console.log(err);
+        });
+      break;
+    default:
+      break;
+  }
 };
 
 exports.appointment = (req, res) => {
@@ -109,7 +137,7 @@ exports.appointment = (req, res) => {
           }
         )
         .then((results) => {
-          res.json({ success: true, results:results[0] });
+          res.json({ success: true, results: results[0] });
         })
         .catch((err) => {
           res.status(500).json({ success: false, err });
@@ -128,7 +156,7 @@ exports.appointment = (req, res) => {
           }
         )
         .then((results) => {
-          res.json({ success: true, results:results[0] });
+          res.json({ success: true, results: results[0] });
         })
         .catch((err) => {
           res.status(500).json({ success: false, err });
@@ -147,7 +175,7 @@ exports.appointment = (req, res) => {
           }
         )
         .then((results) => {
-          res.json({ success: true, results:results[0] });
+          res.json({ success: true, results: results[0] });
         })
         .catch((err) => {
           res.status(500).json({ success: false, err });
@@ -185,7 +213,7 @@ exports.medical_report = (req, res) => {
     other_info,
     facilityId,
   } = req.body;
-console.log('herererreerer')
+  console.log("herererreerer");
   MedicalReport.create({
     user_id,
     admit_date,
