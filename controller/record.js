@@ -6,6 +6,7 @@ const BedList = db.bedlist;
 const NursingNote = db.nursing_note;
 const NursingReport = db.nursing_report;
 const PreviousDoc = db.previous_doc;
+const VitalSigns = db.vital_signs;
 const { Op } = require("sequelize");
 
 exports.saveRecordInfo = (req, res) => {
@@ -451,39 +452,14 @@ exports.getPatientPendingDrugs = (req, res) => {
 };
 
 exports.queryVitals = (req, res) => {
-  const {
-    query_type = "",
-    body_temp = "",
-    pulse_rate = "",
-    blood_pressure = "",
-    respiratory_rate = "",
-    fasting_blood_sugar = "",
-    random_blood_sugar = "",
-    userId = "",
-    facilityId = "",
-    patient_id = "",
-    time = "",
-    spo2 = "",
-  } = req.query;
+  const { patient_id = "" } = req.query;
 
   db.sequelize
     .query(
-      `CALL save_vitals(:query_type,:body_temp,:pulse_rate,:blood_pressure,:respiratory_rate,
-    :fasting_blood_sugar,:random_blood_sugar,:userId,:facilityId,:patient_id,:time, :spo2)`,
+      `SELECT * FROM vital_signs WHERE patient_id=:patient_id ORDER BY created_at DESC;`,
       {
         replacements: {
-          query_type,
-          body_temp,
-          pulse_rate,
-          blood_pressure,
-          respiratory_rate,
-          fasting_blood_sugar,
-          random_blood_sugar,
-          userId,
-          facilityId,
           patient_id,
-          time,
-          spo2,
         },
       }
     )
@@ -497,7 +473,6 @@ exports.queryVitals = (req, res) => {
 
 exports.newVitalSigns = (req, res) => {
   const {
-    query_type,
     body_temp,
     pulse_rate,
     blood_pressure,
@@ -510,32 +485,25 @@ exports.newVitalSigns = (req, res) => {
     time,
     spo2 = "",
   } = req.body;
-
-  db.sequelize
-    .query(
-      `CALL save_vitals(:query_type,:body_temp,:pulse_rate,:blood_pressure,:respiratory_rate,
-    :fasting_blood_sugar,:random_blood_sugar,:userId,:facilityId,:patient_id,:time, :spo2)`,
-      {
-        replacements: {
-          query_type,
-          body_temp,
-          pulse_rate,
-          blood_pressure,
-          respiratory_rate,
-          fasting_blood_sugar,
-          random_blood_sugar,
-          userId,
-          facilityId,
-          patient_id,
-          time,
-          spo2,
-        },
-      }
-    )
+  VitalSigns.create({
+    patient_id,
+    body_temp,
+    pulse_rate,
+    blood_pressure,
+    respiratory_rate,
+    fasting_blood_sugar,
+    random_blood_sugar,
+    spo2,
+    created_by: userId,
+    facilityId,
+    created_at: time,
+  })
     .then((results) => {
+      console.log(results)
       res.json({ success: true, results });
     })
     .catch((err) => {
+      console.log(err)
       res.json({ success: false, err });
     });
 };
