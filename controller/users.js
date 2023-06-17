@@ -286,10 +286,12 @@ exports.findAllUsers = (req, res) => {
 
 exports.findAllUsersById = (req, res) => {
   let { id, facilityId } = req.params;
-  db.sequelize
-    .query("call get_all_user_byId(:id,:facilityId)", {
-      replacements: { id, facilityId },
-    })
+  User.findAll({
+    where: {
+      id,
+      facilityId,
+    },
+  })
     .then((results) => res.status(200).json({ results }))
     .catch((err) => res.status(500).json({ err }));
 };
