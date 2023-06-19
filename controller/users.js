@@ -286,13 +286,17 @@ exports.findAllUsers = (req, res) => {
 
 exports.findAllUsersById = (req, res) => {
   let { id, facilityId } = req.params;
-  User.findAll({
-    where: {
-      id,
-      facilityId,
-    },
-  })
-    .then((results) => res.status(200).json({ results }))
+  db.sequelize
+    .query(`select * from users where facilityId=:facilityId and id=:id`, {
+      replacements: {
+        facilityId,
+        id,
+      },
+    })
+    .then((results) => {
+      // console.log(results)
+      res.status(200).json({ results:results[0] });
+    })
     .catch((err) => res.status(500).json({ err }));
 };
 
