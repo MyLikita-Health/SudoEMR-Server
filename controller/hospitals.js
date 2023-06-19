@@ -1,6 +1,7 @@
 const { v4 } = require("uuid");
 const db = require("../models");
 const Hospital = db.hospitals;
+const Department = db.department
 // const { v4 as uuid } = require("uuidv4");
 const { nearUpdateAPI } = require("../queries/near");
 
@@ -119,6 +120,38 @@ exports.findById = (req, res) => {
   Hospital.findAll({ where: { id } })
     .then((hospital) => res.json({ hospital }))
     .catch((err) => res.status(500).json({ err }));
+};
+
+exports.getDepartments = (req, res) => {
+  const { facilityId = "" } = req.query;
+  db.sequelize
+    .query(`select * from department where facilityId=:facilityId`, {
+      replacements: {
+        facilityId
+      },
+    })
+    .then((results) => {
+      res.json({ success: true, results:results[0] });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+
+exports.createDepartments = (req, res) => {
+  const { facilityId = "",dept_name='',userId='' } = req.query;
+  Department.create({
+    facilityId,
+    dept_name,
+    created_by:userId
+  })
+    .then((results) => {
+      res.json({ success: true, results:results[0] });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 // update a hospital's info

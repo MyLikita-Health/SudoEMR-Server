@@ -295,7 +295,7 @@ exports.findAllUsersById = (req, res) => {
     })
     .then((results) => {
       // console.log(results)
-      res.status(200).json({ results:results[0] });
+      res.status(200).json({ results: results[0] });
     })
     .catch((err) => res.status(500).json({ err }));
 };
@@ -918,9 +918,12 @@ exports.deleteUser = (req, res) => {
     params: { id, facilityId },
   } = req;
   db.sequelize
-    .query("call delete_user(:id, :facilityId)", {
-      replacements: { facilityId, id },
-    })
+    .query(
+      "DELETE FROM `users` WHERE `users`.`id` =:id AND facilityId =:facilityId",
+      {
+        replacements: { facilityId, id },
+      }
+    )
     .then((results) => res.json({ success: true, results }))
     .catch((err) => res.status(500).json({ err }));
 };

@@ -18,7 +18,9 @@ module.exports = (app) => {
   app.get('/hospitals', hospital.findAll)
 
   // get a hospital by id
-  app.get('/hospitals/:hospitalId', hospital.findById)
+  app.get('/hospitals/:hospitalId', hospital.findById);
+  app.get('/department',hospital.getDepartments);
+  app.post('/department/create',hospital.createDepartments)
 
   // update hospital
   app.put('/hospitals/:hospitalId', hospital.update)
